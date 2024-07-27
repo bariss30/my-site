@@ -1,0 +1,23 @@
+body{
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-image: url(2.png); /* Arka plan resmi yolu */
+    background-size: cover; /* Resmi tüm alana sığdır */
+    background-repeat: no-repeat; /* Resmin tekrar etmesini engelle */
+    background-position: center center; /* Resmi ortala */
+    cursor: url('icons8-minecraft-sword-48.png') ,auto; /* Özel imleç */
+    background-color: lightblue;
+}
+
+
+.container {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    margin-top: 50px;
+}
+.container h1 {
+    color: white;
+
+    font-style: oblique;
+}
