@@ -8,6 +8,13 @@ body {
     background-position: center center; /* Resmi ortala */
     cursor: url('icons8-minecraft-sword-48.png') ,auto; /* Özel imleç */
     background-color: rgb(24 24 24 );
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-feature-settings: normal;
+    font-feature-settings: normal;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+    font-variation-settings: normal;
+    line-height: 1.5;
+    tab-size: 4;
 
 }
 
@@ -22,3 +29,4 @@ body {
     color: white;
     font-style: oblique;
 }
+
