@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', (event) => {
-    const text = "Merhaba, dünya!";
+    const text = "Merhaba, Ziyaretçi! Gizemli Sayfaya Hoşgeldin... Burada Merak Ettiklerini Bulabileceksin!!";
     const typingEffectElement = document.getElementById('typingEffect');
     let index = 0;
 
