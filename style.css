@@ -2,26 +2,22 @@ body {
     margin: 0;
     padding: 0;
     height: 100vh;
-    background-image: url(2.png); /* Arka plan resmi yolu */
-    background-size: cover; /* Resmi tüm alana sığdır */
+    background-image: url(image.6f66cc6e0e6e72ba7d32.jpg); /* Arka plan resmi yolu */
+    background-size: contain; /* Resmi ekran boyutuna göre sığdır */
     background-repeat: no-repeat; /* Resmin tekrar etmesini engelle */
     background-position: center center; /* Resmi ortala */
     cursor: url('icons8-minecraft-sword-48.png') ,auto; /* Özel imleç */
-    background-color: lightblue;
+    background-color: rgb(24 24 24 );
+
 }
 
-/* Daha küçük ekran boyutları için responsive düzenlemeler */
-@media (max-width: 768px) {
-    body {
-        background-position: top center; /* Küçük ekranlarda resmi yukarı ortala */
-    }
-}
 
 .container {
     text-align: center;
     font-family: Arial, sans-serif;
     margin-top: 50px;
 }
+
 .container h1 {
     color: white;
     font-style: oblique;
