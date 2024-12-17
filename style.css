@@ -117,28 +117,39 @@ section h2 {
 }
 
 .project-card {
-    background-color: var(--accent-color);
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 200px; /* Kart genişliği */
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
 }
 
 .project-card:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transform: translateY(-5px);
+    transform: translateY(-10px); /* Hover efekti */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
-.profile-image {
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--text-color);
-    margin: 0 auto 1rem;
-    display: block;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+.project-image {
+    width: 100%; /* Görselin kart genişliğine uyumlu olmasını sağlar */
+    height: auto;
+    border-radius: 8px; /* Yuvarlatılmış köşeler */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
 }
+
+h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 14px;
+    color: #555;
+}
+
 
 .terminal-style {
     background-color: var(--bg-color);
@@ -156,39 +167,35 @@ section h2 {
     color: var(--accent-color);
 }
 
-.topic-list {
-    list-style-type: none;
-    padding: 0;
-}
-
+/* .topic-item başlangıçta gizli */
 .topic-item {
-    background-color: var(--accent-color);
-    margin-bottom: 0.5rem;
-    padding: 0.5rem;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.topic-item:hover {
-    background-color: var(--secondary-color);
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-}
-
-.topic-item.active {
-    background-color: var(--secondary-color);
-}
-
-.topic-details {
     display: none;
-    padding: 0.5rem;
-    background-color: var(--bg-color);
-    border-radius: 0 0 5px 5px;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
-.topic-details.active {
+/* Görünür hale gelmesi için 'show' sınıfı eklenir */
+.topic-item.show {
     display: block;
 }
+
+/* Basit bir animasyon */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+
+
+
 
 .glitch-effect {
     position: relative;
