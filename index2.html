@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siber Kartlar - Barış</title>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body { background-color: #111827; color: white; }
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function CyberFlashcards() {
+            // Varsayılan veriler
+            const defaultTopics = [
+                {
+                    id: 1,
+                    title: 'Active Directory',
+                    expanded: false,
+                    cards: [
+                        { id: 11, question: 'Kerberos portu kaçtır?', answer: '88 (TCP/UDP)' },
+                        { id: 12, question: 'Golden Ticket nedir?', answer: 'KRBTGT hash\'i ile oluşturulan, sınırsız yetkili sahte bilet.' },
+                    ]
+                },
+                {
+                    id: 2,
+                    title: 'Web Security',
+                    expanded: false,
+                    cards: [
+                        { id: 21, question: 'XSS nedir?', answer: 'Cross-Site Scripting: Başkasının tarayıcısında kod çalıştırma açığı.' },
+                    ]
+                }
+            ];
+
+            const [topics, setTopics] = useState(() => {
+                const saved = localStorage.getItem('cyberFlashcardsData');
+                return saved ? JSON.parse(saved) : defaultTopics;
+            });
+
+            const [mode, setMode] = useState('browse');
+            const [selectedTopic, setSelectedTopic] = useState(null);
+            const [editingCard, setEditingCard] = useState(null);
+            const [testCards, setTestCards] = useState([]);
+            const [currentCardIndex, setCurrentCardIndex] = useState(0);
+            const [testStats, setTestStats] = useState({ correct: 0, wrong: 0 });
+            const [isFlipped, setIsFlipped] = useState(false);
+            const [newQuestion, setNewQuestion] = useState('');
+            const [newAnswer, setNewAnswer] = useState('');
+            const [showAddCard, setShowAddCard] = useState(null);
+
+            useEffect(() => {
+                localStorage.setItem('cyberFlashcardsData', JSON.stringify(topics));
+            }, [topics]);
+
+            const exportData = () => {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(topics));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "siber_kartlarim.json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+            };
+
+            const importData = (event) => {
+                const fileReader = new FileReader();
+                fileReader.readAsText(event.target.files[0], "UTF-8");
+                fileReader.onload = e => {
+                    try {
+                        const parsedData = JSON.parse(e.target.result);
+                        setTopics(parsedData);
+                        alert("Veriler yüklendi!");
+                    } catch (err) {
+                        alert("Dosya hatalı!");
+                    }
+                };
+            };
+
+            const toggleTopic = (topicId) => {
+                setTopics(topics.map(t => 
+                    t.id === topicId ? { ...t, expanded: !t.expanded } : t
+                ));
+            };
+
+            const addCard = (topicId) => {
+                if (newQuestion.trim() && newAnswer.trim()) {
+                    setTopics(topics.map(t => {
+                        if (t.id === topicId) {
+                            return {
+                                ...t,
+                                cards: [...t.cards, { id: Date.now(), question: newQuestion, answer: newAnswer }]
+                            };
+                        }
+                        return t;
+                    }));
+                    setNewQuestion('');
+                    setNewAnswer('');
+                    setShowAddCard(null);
+                }
+            };
+
+            const deleteCard = (topicId, cardId) => {
+                if(confirm("Silmek istediğine emin misin?")) {
+                    setTopics(topics.map(t => 
+                        t.id === topicId ? { ...t, cards: t.cards.filter(c => c.id !== cardId) } : t
+                    ));
+                }
+            };
+
+            const updateCard = (topicId, cardId, question, answer) => {
+                setTopics(topics.map(t => 
+                    t.id === topicId 
+                        ? { ...t, cards: t.cards.map(c => c.id === cardId ? { ...c, question, answer } : c) }
+                        : t
+                ));
+                setEditingCard(null);
+            };
+
+            const startTest = (topic) => {
+                const shuffled = [...topic.cards].sort(() => Math.random() - 0.5);
+                setTestCards(shuffled);
+                setCurrentCardIndex(0);
+                setTestStats({ correct: 0, wrong: 0 });
+                setIsFlipped(false);
+                setMode('test');
+                setSelectedTopic(topic);
+            };
+
+            const handleAnswer = (correct) => {
+                setTestStats(prev => ({
+                    correct: prev.correct + (correct ? 1 : 0),
+                    wrong: prev.wrong + (correct ? 0 : 1)
+                }));
+                setIsFlipped(false);
+                setTimeout(() => {
+                    setCurrentCardIndex(prev => prev + 1);
+                }, 300);
+            };
+
+            const addNewTopic = () => {
+                const title = prompt('Yeni konu adı:');
+                if (title && title.trim()) {
+                    setTopics([...topics, {
+                        id: Date.now(),
+                        title: title.trim(),
+                        expanded: true,
+                        cards: []
+                    }]);
+                }
+            };
+
+            // TEST MODU
+            if (mode === 'test') {
+                const isFinished = currentCardIndex >= testCards.length;
+                const currentCard = testCards[currentCardIndex];
+                const progress = (currentCardIndex / testCards.length) * 100;
+
+                return (
+                    <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center p-4">
+                        <div className="w-full max-w-md">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-bold text-blue-400 truncate">{selectedTopic.title}</h2>
+                                <button onClick={() => setMode('browse')} className="text-sm px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">Çıkış</button>
+                            </div>
+
+                            <div className="w-full bg-gray-700 h-2 rounded-full mb-6">
+                                <div className="bg-blue-500 h-2 rounded-full transition-all duration-300" style={{ width: `${isFinished ? 100 : progress}%` }}></div>
+                            </div>
+
+                            {!isFinished ? (
+                                <div className="perspective-1000">
+                                    <div 
+                                        className={`relative w-full h-80 cursor-pointer transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}
+                                        onClick={() => setIsFlipped(!isFlipped)}
+                                    >
+                                        <div className="absolute w-full h-full bg-slate-800 rounded-xl p-6 flex flex-col items-center justify-center border-2 border-slate-700 shadow-2xl backface-hidden">
+                                            <span className="text-blue-400 font-semibold mb-4 tracking-widest text-sm">SORU</span>
+                                            <h3 className="text-2xl font-bold text-center">{currentCard.question}</h3>
+                                            <p className="text-gray-500 text-sm mt-8 animate-pulse">(Cevabı görmek için tıkla)</p>
+                                        </div>
+
+                                        <div className="absolute w-full h-full bg-blue-900 rounded-xl p-6 flex flex-col items-center justify-center border-2 border-blue-700 shadow-2xl backface-hidden rotate-y-180">
+                                            <span className="text-blue-200 font-semibold mb-4 tracking-widest text-sm">CEVAP</span>
+                                            <p className="text-xl text-center text-white">{currentCard.answer}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className={`flex gap-3 mt-8 transition-opacity duration-300 ${isFlipped ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+                                        <button onClick={() => handleAnswer(false)} className="flex-1 py-4 bg-red-600/90 rounded-xl hover:bg-red-600 font-bold shadow-lg">❌ Bilmiyordum</button>
+                                        <button onClick={() => handleAnswer(true)} className="flex-1 py-4 bg-green-600/90 rounded-xl hover:bg-green-600 font-bold shadow-lg">✅ Biliyordum</button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="bg-slate-800 rounded-xl p-8 text-center border border-slate-700 shadow-2xl mt-10">
+                                    <h3 className="text-3xl font-bold text-white mb-2">Bitti! 🎉</h3>
+                                    <div className="flex justify-center gap-8 my-8">
+                                        <div className="text-center"><div className="text-4xl font-bold text-green-500">{testStats.correct}</div><div className="text-xs text-gray-400">DOĞRU</div></div>
+                                        <div className="text-center"><div className="text-4xl font-bold text-red-500">{testStats.wrong}</div><div className="text-xs text-gray-400">YANLIŞ</div></div>
+                                    </div>
+                                    <div className="flex flex-col gap-3">
+                                        <button onClick={() => startTest(selectedTopic)} className="w-full py-3 bg-blue-600 rounded-lg font-semibold hover:bg-blue-500">🔄 Tekrar Dene</button>
+                                        <button onClick={() => setMode('browse')} className="w-full py-3 bg-gray-700 rounded-lg font-semibold hover:bg-gray-600">🏠 Ana Sayfa</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            }
+
+            // ANA SAYFA MODU
+            return (
+                <div className="min-h-screen bg-gray-900 text-gray-100 p-4 md:p-8">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                            <div>
+                                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">CyberCards 🛡️</h1>
+                                <p className="text-gray-400 text-sm">Siber güvenlik notların cebinde.</p>
+                            </div>
+                            <div className="flex gap-2 w-full md:w-auto">
+                                <button onClick={exportData} className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 text-sm">💾 Yedekle</button>
+                                <label className="flex-1 flex items-center justify-center px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 cursor-pointer text-sm">
+                                    📂 Yükle <input type="file" onChange={importData} className="hidden" accept=".json" />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            {topics.map(topic => (
+                                <div key={topic.id} className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 shadow-lg">
+                                    <div className="p-4 bg-slate-800 flex items-center justify-between cursor-pointer hover:bg-slate-750 transition-colors" onClick={() => toggleTopic(topic.id)}>
+                                        <div className="flex items-center gap-3">
+                                            <span>{topic.expanded ? '🔽' : '▶️'}</span>
+                                            <h2 className="text-lg font-bold text-white">{topic.title}</h2>
+                                            <span className="text-xs px-2 py-1 bg-slate-700 rounded-full text-gray-300">{topic.cards.length}</span>
+                                        </div>
+                                        {topic.cards.length > 0 && (
+                                            <button onClick={(e) => { e.stopPropagation(); startTest(topic); }} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-500 text-sm font-medium">🧠 Test</button>
+                                        )}
+                                    </div>
+
+                                    {topic.expanded && (
+                                        <div className="p-4 border-t border-slate-700 bg-slate-900/50">
+                                            <div className="grid gap-3 mb-4">
+                                                {topic.cards.map(card => (
+                                                    <div key={card.id} className="bg-slate-800 border border-slate-700 rounded-lg p-4 group">
+                                                        {editingCard === card.id ? (
+                                                            <div className="space-y-3">
+                                                                <input defaultValue={card.question} onChange={(e) => card.tempQuestion = e.target.value} className="w-full p-2 bg-slate-900 border border-slate-600 rounded text-white" placeholder="Soru" />
+                                                                <textarea defaultValue={card.answer} onChange={(e) => card.tempAnswer = e.target.value} className="w-full p-2 bg-slate-900 border border-slate-600 rounded text-white" placeholder="Cevap" />
+                                                                <div className="flex gap-2 justify-end">
+                                                                    <button onClick={() => setEditingCard(null)} className="px-3 py-1 text-sm text-gray-400">İptal</button>
+                                                                    <button onClick={() => updateCard(topic.id, card.id, card.tempQuestion || card.question, card.tempAnswer || card.answer)} className="px-3 py-1 bg-green-600 rounded text-sm">Kaydet</button>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex justify-between items-start gap-4">
+                                                                <div className="flex-1">
+                                                                    <div className="font-semibold text-gray-200 mb-1">{card.question}</div>
+                                                                    <div className="text-gray-400 text-sm leading-relaxed">{card.answer}</div>
+                                                                </div>
+                                                                <div className="flex flex-col gap-2">
+                                                                    <button onClick={() => setEditingCard(card.id)} className="text-blue-400 hover:text-blue-300">✏️</button>
+                                                                    <button onClick={() => deleteCard(topic.id, card.id)} className="text-red-400 hover:text-red-300">🗑️</button>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {showAddCard === topic.id ? (
+                                                <div className="bg-slate-800 border border-blue-500/50 rounded-lg p-4">
+                                                    <input value={newQuestion} onChange={(e) => setNewQuestion(e.target.value)} className="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg mb-3 text-white" placeholder="Soru (örn: SSH portu?)" autoFocus />
+                                                    <textarea value={newAnswer} onChange={(e) => setNewAnswer(e.target.value)} className="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg mb-3 text-white" placeholder="Cevap (örn: 22)" rows="2" />
+                                                    <div className="flex gap-2">
+                                                        <button onClick={() => addCard(topic.id)} className="flex-1 py-2 bg-blue-600 text-white rounded-lg">Ekle</button>
+                                                        <button onClick={() => setShowAddCard(null)} className="px-4 py-2 bg-slate-700 text-white rounded-lg">İptal</button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <button onClick={() => setShowAddCard(topic.id)} className="w-full py-3 border border-dashed border-slate-600 rounded-lg text-slate-400 hover:border-blue-500 hover:text-blue-400 flex items-center justify-center gap-2">
+                                                    ➕ Kart Ekle
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+
+                            <button onClick={addNewTopic} className="w-full py-4 bg-slate-800 border border-dashed border-slate-600 rounded-xl text-slate-300 hover:bg-slate-750 hover:border-blue-500 hover:text-blue-400 flex items-center justify-center gap-2 mt-6">
+                                ➕ <span className="font-semibold">Yeni Konu Ekle</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<CyberFlashcards />);
+    </script>
+</body>
+</html>
