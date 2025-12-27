@@ -1,17 +1,4 @@
-Belirttiğin sorunları çözmek için koddaki şu kritik değişiklikleri yaptım:
 
-1. **Taşma Sorunu (Overflow):** Kartın arka yüzündeki (cevap kısmı) içeriği, kartın boyunu aşarsa kaydırılabilir (scrollable) hale getirdim. Artık uzun cevaplar karttan dışarı taşmayacak, kartın içinde parmakla aşağı yukarı kaydırılabilecek.
-2. **Format Koruma (Whitespace):** Cevap metnine `whitespace-pre-wrap` CSS özelliğini ekledim. Bu sayede input alanına girerken yaptığın **alt satıra geçmeler (Enter), boşluklar ve paragraflar** aynen korunacak. Kod blokları veya listeler düzgün görünecek.
-3. **Mobil Görünüm:**
-* Kart yüksekliğini mobilde daha rahat okunması için biraz artırdım (`h-80` -> `h-96`).
-* Yazı boyutlarını mobilde okunabilir, desktopta daha büyük olacak şekilde ayarladım.
-* Cevap metnini `text-center` yerine `text-left` (sola dayalı) yaptım. Uzun teknik açıklamalarda (kod vs.) ortalı yazı mobilde okunması zor olur.
-
-
-
-İşte düzeltilmiş, kopyalayıp kullanabileceğin **tam kod**:
-
-```html
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -526,3 +513,4 @@ Belirttiğin sorunları çözmek için koddaki şu kritik değişiklikleri yapt�
 </html>
 
 ```
+
