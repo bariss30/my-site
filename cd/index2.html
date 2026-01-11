@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>İyi ki Doğdun Prensesimiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- GENEL AYARLAR & TEMA --- */
+        :root {
+            --pastel-blue: #dcedff;
+            --pastel-pink: #ffe4e1;
+            --book-cover: #8e44ad; 
+            --page-color: #fff9e6; 
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #a1c4fd, #c2e9fb); 
+            font-family: 'Quicksand', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- KAR EFEKTİ --- */
+        .snowflake {
+            position: absolute;
+            top: -10px;
+            color: white;
+            font-size: 1.2em;
+            opacity: 0.9;
+            pointer-events: none;
+            z-index: 1;
+            animation: fall linear infinite;
+        }
+        @keyframes fall { to { transform: translateY(105vh); } }
+
+        /* --- SAHNE YAPISI --- */
+        .sahne {
+            width: 90%;
+            height: 85%; /* Alanı optimize ettik */
+            position: absolute;
+            top: 5%;
+            display: none; 
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .aktif-sahne {
+            display: flex;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Resim ve GIF Stilleri */
+        .medya-kutusu {
+            background: white;
+            padding: 8px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 10px 0;
+            max-width: 100%;
+            /* Taşmayı engellemek için esnek yapı */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .medya-kutusu img {
+            max-width: 100%;
+            max-height: 35vh; /* Yüksekliği ekrana göre sınırla */
+            border-radius: 10px;
+            object-fit: contain;
+        }
+
+        .konusma-balonu {
+            background: #fff;
+            padding: 15px;
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem); /* Mobil uyumlu yazı boyutu */
+            color: #555;
+            max-width: 90%;
+        }
+        .konusma-balonu::after {
+            content: ''; position: absolute; bottom: -10px; left: 50%;
+            transform: translateX(-50%);
+            border-width: 10px 10px 0; border-style: solid;
+            border-color: #fff transparent transparent transparent;
+        }
+
+        /* --- RESPONSIVE PROFESYONEL KİTAP --- */
+        .kitap-sahnesi {
+            perspective: 1500px; 
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .kitap {
+            /* Kitap boyutu artık ekranın %80'i kadar (mobil uyumlu) */
+            width: min(350px, 85vw); 
+            height: min(500px, 65vh);
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        
+        .sayfa {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            transform-origin: left center; 
+            transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1);
+            transform-style: preserve-3d;
+            border-radius: 0 10px 10px 0;
+            box-shadow: inset 10px 0 30px rgba(0,0,0,0.1); 
+        }
+
+        /* Sayfa İçeriği - Flexbox ile Sığdırma */
+        .on-yuz {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--page-color);
+            backface-visibility: hidden; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* İçeriği yay */
+            align-items: center;
+            padding: 15px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-left: 5px solid #ccc; 
+            background-image: url("https://www.transparenttextures.com/patterns/aged-paper.png");
+            overflow: hidden; /* Dışarı taşarsa gizle */
+        }
+
+        .arka-yuz {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #f0e6d2;
+            backface-visibility: hidden;
+            transform: rotateY(180deg);
+            border-radius: 10px 0 0 10px;
+            border: 1px solid #ddd;
+            z-index: 0;
+        }
+
+        .s1 { z-index: 5; }
+        .s2 { z-index: 4; }
+        .s3 { z-index: 3; }
+        .s4 { z-index: 2; }
+        .s5 { z-index: 1; }
+
+        .cevrildi { transform: rotateY(-180deg); }
+
+        /* Responsive Yazı Tipleri */
+        .kitap h2 { 
+            font-family: 'Dancing Script', cursive; 
+            font-size: clamp(1.5rem, 5vw, 2.2rem); /* Ekrana göre büyüyüp küçülür */
+            color: #d35400; 
+            margin: 5px 0;
+            line-height: 1.1;
+        }
+        
+        .kitap p { 
+            font-size: clamp(0.8rem, 3vw, 1rem); 
+            line-height: 1.4; 
+            color: #444; 
+            margin: 10px 0;
+        }
+
+        /* Resimlerin Sığması İçin Kritik Ayar */
+        .polaroid { 
+            background: white; 
+            padding: 5px 5px 20px 5px; 
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2); 
+            
+            /* Akıllı Boyutlandırma */
+            width: auto;
+            height: auto;
+            max-width: 90%; /* Sayfa genişliğini geçmesin */
+            max-height: 50%; /* Sayfa yüksekliğinin yarısını geçmesin */
+            object-fit: contain; /* Resmi bozmadan sığdır */
+            flex-shrink: 1; /* Gerekirse küçül */
+        }
+        
+        .kapak .on-yuz {
+            background: #8e44ad; 
+            color: white;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #ffce00;
+        }
+        .kapak h1 { font-family: 'Dancing Script', cursive; font-size: 3em; text-shadow: 2px 2px #333; margin: 0; }
+
+        /* --- PASTA VE DİLEK --- */
+        .pasta-container { position: relative; margin-top: 20px; transition: all 0.5s; }
+        .mumlar { display: flex; gap: 10px; position: absolute; top: -30px; left: 50%; transform: translateX(-50%); }
+        .mum { width: 8px; height: 40px; background: pink; position: relative; }
+        .alev { 
+            width: 12px; height: 18px; background: orange; border-radius: 50% 50% 20% 20%; 
+            position: absolute; top: -15px; left: -2px; 
+            animation: yanma 0.3s infinite alternate; 
+            box-shadow: 0 0 10px yellow;
+        }
+        @keyframes yanma { from { transform: scale(1); } to { transform: scale(1.1); } }
+        
+        .salla-animasyon { animation: shake 0.8s; }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px) rotate(-5deg);} 75% {transform: translateX(5px) rotate(5deg);} }
+
+        #minyonlar-gif {
+            display: none; 
+            width: 90%;
+            max-width: 300px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); 
+            margin: 10px auto;
+            animation: popUp 0.5s;
+        }
+        @keyframes popUp { from { transform: scale(0); } to { transform: scale(1); } }
+
+        /* --- KONTROLLER --- */
+        .kontrol-alani {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            z-index: 100;
+        }
+        .btn {
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.2em;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255, 105, 135, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-geri { background: #b2bec3; display: none; } 
+
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        .modal-icerik {
+            background: white; padding: 25px; border-radius: 15px; text-align: center;
+            animation: popIn 0.3s;
+            width: 80%;
+            max-width: 300px;
+        }
+        @keyframes popIn { from { transform: scale(0.5); } to { transform: scale(1); } }
+
+    </style>
+</head>
+<body>
+
+    <div id="kar-alani"></div>
+
+    <div class="sahne aktif-sahne" id="sahne-1">
+        <div class="konusma-balonu">
+            Merhaba! Bu hikayenin kahramanı <b>Ceren</b>... <br>
+            Kendisi şu an sınavlar yüzünden biraz yoğun ve stresli ama önemli değil, çünkü hepsinden geçeceğini biliyoruz! 📚🤯💪
+        </div>
+        
+        <div class="medya-kutusu" style="background: transparent; box-shadow: none; padding: 0;">
+            <img src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" alt="Ders Çalışan Kedi" style="max-height: 120px;">
+        </div>
+
+        <div class="medya-kutusu">
+            <img src="ceren.png" alt="Ceren">
+        </div>
+        <div class="konusma-balonu" style="margin-top: 10px; background: #ffe4e1;">
+            Ama bugün özel bir gün! Hadi zamanı biraz geri alalım... ⏳
+        </div>
+    </div>
+
+    <div class="sahne" id="sahne-2">
+        <h2 style="color: #555;">Geçmişe Gidiyoruz...</h2>
+        <div class="medya-kutusu">
+            <img src="https://media.giphy.com/media/3o7ZetIsjtbkgNE1I4/giphy.gif" alt="Zaman Yolculuğu">
+        </div>
+    </div>
+
+    <div class="sahne" id="sahne-3">
+        <div class="konusma-balonu">
+            Ve işte her şeyin başladığı o yer... <br>
+            Küçük prensesin sarayı! 🏰
+        </div>
+        <div class="medya-kutusu" style="position: relative;">
+            <img src="ev.jpg" alt="Ev">
+            <div style="position: absolute; bottom: 0; width: 100%; background: rgba(255,255,255,0.8); padding: 5px;">
+                📍 Zeynep Kamil
+            </div>
+        </div>
+    </div>
+
+    <div class="sahne" id="sahne-4">
+        <h2>Hazır mısın?</h2>
+        <div class="medya-kutusu">
+            <img src="https://media.giphy.com/media/SiGg4zSmwmbafTYwpj/giphy.gif" alt="Heyecan">
+        </div>
+        <p>Senin için özel bir kitap yazdık...</p>
+    </div>
+
+    <div class="sahne" id="sahne-5">
+        <div class="kitap-sahnesi">
+            <div class="kitap" id="masal-kitabi">
+                
+                <div class="sayfa s1 kapak">
+                    <div class="on-yuz">
+                        <div style="font-size: 3em;">✨</div>
+                        <h1>CERENİMİZ</h1>
+                        <p>Bir Prensesin Masalı</p>
+                        <p style="margin-top: auto; font-size: 0.8em; color: #eee;">Kapağı açmak için "İleri" tuşuna bas</p>
+                    </div>
+                    <div class="arka-yuz"></div>
+                </div>
+
+                <div class="sayfa s2">
+                    <div class="on-yuz">
+                        <h2>Baksanıza Şu Güzelliğe!</h2>
+                        <img src="foto1.jpeg" class="polaroid">
+                        <p>Sadece yüzün değil, kalbinin güzelliği de yansıyor. Sen bizim en parlak yıldızımızsın! ✨</p>
+                    </div>
+                    <div class="arka-yuz"></div>
+                </div>
+
+                <div class="sayfa s3">
+                    <div class="on-yuz">
+                        <h2>Güneşin Öpücükleri</h2>
+                        <img src="foto2.jpeg" class="polaroid" style="transform: rotate(3deg);">
+                        <p>Yüzündeki o çillerin her biri, evrenin sana kondurduğu birer yıldız tozu sanki... ✨</p>
+                    </div>
+                    <div class="arka-yuz"></div>
+                </div>
+
+                <div class="sayfa s4">
+                    <div class="on-yuz">
+                        <h2>Tipe Bak :D</h2>
+                        <img src="foto3.jpeg" class="polaroid" style="transform: rotate(-4deg);">
+                        <p>Bazen beni öldürmek istesen de 😂 <br>En saçma, en doğal ve en "BİZ" olduğumuz bu anları dünyalara değişmem.</p>
+                    </div>
+                    <div class="arka-yuz"></div>
+                </div>
+
+                <div class="sayfa s5">
+                    <div class="on-yuz" style="justify-content: center; text-align: center;">
+                        <h2>Hikaye Devam Ediyor...</h2>
+                        <p>Bu kitabın daha yazılacak çok sayfası var. Ama şimdi kutlama zamanı!</p>
+                        <div style="font-size: 3em;">🎂➡</div>
+                    </div>
+                    <div class="arka-yuz"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="sahne" id="sahne-6">
+        <h1 id="dogum-gunu-mesaji" style="display:none; color: #e84393; font-family: 'Dancing Script'; font-size: 2.5em; text-shadow: 2px 2px white;">İYİ Kİ DOĞDUN! 🎂</h1>
+        
+        <img id="minyonlar-gif" src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNGdzbmpzZ3l6NnZnZnl2ZXdyazJmenN4ZzhmZ2MycGNtaG4xanF1aSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/rzgtpcZyQwO6tzv1ZE/giphy.gif" alt="Minyonlar Kutlama">
+
+        <div class="pasta-container" id="pasta-kutusu">
+            <div class="mumlar" id="mumlar">
+                <div class="mum"><div class="alev"></div></div>
+                <div class="mum"><div class="alev"></div></div>
+                <div class="mum"><div class="alev"></div></div>
+            </div>
+            <img src="https://cdn-icons-png.flaticon.com/512/2682/2682340.png" width="200" alt="Pasta">
+        </div>
+
+        <button class="btn" id="ufle-btn" style="margin-top: 30px; background: #00cec9;">💨 ÜFLE</button>
+    </div>
+
+    <div class="sahne" id="sahne-7" style="background: black; width: 100%; height: 100%; top: 0;">
+        <div style="color: white; margin-bottom: 10px; font-weight: bold;">Videoyu izlemeyi unutma! 👇</div>
+        <div id="player"></div>
+    </div>
+
+    <div class="kontrol-alani" id="ana-kontroller">
+        <button class="btn btn-geri" id="geri-btn" onclick="sahneDegistir(-1)">⬅ Geri</button>
+        <button class="btn" id="ileri-btn" onclick="sahneDegistir(1)">İleri ➡</button>
+    </div>
+
+    <div class="modal" id="dilek-modal">
+        <div class="modal-icerik">
+            <h3>✨ Dilek tuttun mu? ✨</h3>
+            <p>Hemen içinden güzel bir dilek tut...</p>
+            <button class="btn" style="background: #e84393; margin: 10px;" onclick="dilekCevap(true)">Tuttum! (EVET)</button>
+            <button class="btn" style="background: #b2bec3; margin: 10px;" onclick="dilekCevap(false)">Henüz değil (HAYIR)</button>
+        </div>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+    <script>
+        let anlikSahne = 1;
+        const toplamSahne = 7;
+        let kitapSayfasi = 0;
+        const toplamKitapSayfasi = 5; 
+        let ufleSayaci = 0;
+
+        // KAR YAĞDIRMA
+        function karYagdir() {
+            const container = document.getElementById('kar-alani');
+            for(let i=0; i<30; i++) {
+                let kar = document.createElement('div');
+                kar.innerHTML = '❄';
+                kar.className = 'snowflake';
+                kar.style.left = Math.random() * 100 + 'vw';
+                kar.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                kar.style.fontSize = (Math.random() * 10 + 10) + 'px';
+                container.appendChild(kar);
+            }
+        }
+        karYagdir();
+
+        // SAHNE YÖNETİMİ
+        function sahneGoster(sahneNo) {
+            document.querySelectorAll('.sahne').forEach(el => el.classList.remove('aktif-sahne'));
+            document.getElementById('sahne-' + sahneNo).classList.add('aktif-sahne');
+            
+            const ileriBtn = document.getElementById('ileri-btn');
+            const geriBtn = document.getElementById('geri-btn');
+            const kontroller = document.getElementById('ana-kontroller');
+
+            geriBtn.style.display = sahneNo > 1 ? 'block' : 'none';
+
+            if (sahneNo === 6) { 
+                kontroller.style.display = 'none'; 
+            } else if (sahneNo === 7) { 
+                kontroller.style.display = 'none';
+                if(player && player.playVideo) player.playVideo();
+            } else {
+                kontroller.style.display = 'flex';
+            }
+        }
+
+        function sahneDegistir(yon) {
+            if (anlikSahne === 5) {
+                if (yon === 1) { 
+                    if (kitapSayfasi < toplamKitapSayfasi) {
+                        kitapSayfasi++;
+                        document.querySelector(`.s${kitapSayfasi}`).classList.add('cevrildi');
+                    } else {
+                        anlikSahne++;
+                        sahneGoster(anlikSahne);
+                    }
+                } else { 
+                    if (kitapSayfasi > 0) {
+                        document.querySelector(`.s${kitapSayfasi}`).classList.remove('cevrildi');
+                        kitapSayfasi--;
+                    } else {
+                        anlikSahne--;
+                        sahneGoster(anlikSahne);
+                    }
+                }
+            } else {
+                if (yon === 1 && anlikSahne < toplamSahne) {
+                    anlikSahne++;
+                    sahneGoster(anlikSahne);
+                } else if (yon === -1 && anlikSahne > 1) {
+                    anlikSahne--;
+                    sahneGoster(anlikSahne);
+                }
+            }
+        }
+
+        // KONFETİ YAĞMURU FONKSİYONU (DAHA FAZLA VE HER YERDEN)
+        function bolKonfetiPatlat() {
+            var count = 300; // Parçacık sayısı arttı
+            var defaults = {
+                origin: { y: 0.7 }
+            };
+
+            function fire(particleRatio, opts) {
+                confetti(Object.assign({}, defaults, opts, {
+                    particleCount: Math.floor(count * particleRatio)
+                }));
+            }
+
+            fire(0.25, { spread: 26, startVelocity: 55, });
+            fire(0.2, { spread: 60, });
+            fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+            fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+            fire(0.1, { spread: 120, startVelocity: 45, });
+        }
+
+        const ufleBtn = document.getElementById('ufle-btn');
+        ufleBtn.addEventListener('click', function() {
+            if (ufleSayaci === 0) {
+                document.getElementById('pasta-kutusu').classList.add('salla-animasyon');
+                setTimeout(() => {
+                    document.getElementById('pasta-kutusu').classList.remove('salla-animasyon');
+                    document.getElementById('dilek-modal').style.display = 'flex';
+                }, 800);
+            } else {
+                // Final Kutlaması
+                document.getElementById('mumlar').style.display = 'none';
+                document.getElementById('dogum-gunu-mesaji').style.display = 'block';
+                ufleBtn.style.display = 'none';
+                
+                // Minyonları Göster!
+                document.getElementById('minyonlar-gif').style.display = 'block';
+
+                // KONFETİ YAĞMURU
+                bolKonfetiPatlat();
+
+                // Videoya geçiş süresi (5 saniye)
+                setTimeout(() => {
+                    anlikSahne = 7;
+                    sahneGoster(anlikSahne);
+                }, 5000);
+            }
+        });
+
+        function dilekCevap(cevap) {
+            document.getElementById('dilek-modal').style.display = 'none';
+            if (!cevap) {
+                alert("Bekliyoruz... Dilek tutmadan olmaz! 😉");
+            }
+            ufleSayaci = 1;
+        }
+
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '100%',
+                width: '100%',
+                videoId: 'pzc-UIRe45w', 
+                playerVars: { 'autoplay': 1, 'controls': 1, 'rel': 0 }
+            });
+        }
+    </script>
+</body>
+</html>
