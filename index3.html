@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>UNO P2P</title>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0c10; --surface: #121620; --surface2: #1a1f2c; --border: #2d3548;
+            --red: #ff1e27; --blue: #0066ff; --green: #00e65b; --yellow: #ffcc00; --gold: #ffcc00;
+            --card-w: 68px; --card-h: 102px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Nunito', sans-serif; user-select: none; -webkit-user-select: none; }
+        body { background: var(--bg); color: #fff; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 90% 60% at 50% 55%, #0f1f13 0%, #0a0c10 75%); z-index: 0; }
+        body > * { position: relative; z-index: 1; }
+
+        #connection-panel { position: fixed; inset: 0; background: radial-gradient(circle at 50% 40%, #151924 0%, #06070a 100%); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 14px; padding: 30px; text-align: center; }
+        .logo { font-family: 'Orbitron', sans-serif; font-size: 3.2rem; font-weight: 900; color: var(--red); letter-spacing: 4px; text-shadow: 0 0 30px rgba(255,30,39,0.5); margin-bottom: 5px; }
+        .logo span { color: var(--gold); }
+        .subtitle { color: #555; font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; }
+        .btn { background: linear-gradient(135deg, var(--red), #a01020); border: none; color: white; padding: 13px 32px; font-weight: 900; border-radius: 30px; font-size: 0.95rem; cursor: pointer; box-shadow: 0 5px 20px rgba(255,30,39,0.35); transition: transform 0.15s; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.95); }
+        .btn-green { background: linear-gradient(135deg, var(--green), #00aa40); color: #000; box-shadow: 0 5px 20px rgba(0,230,91,0.3); }
+        .btn-blue { background: linear-gradient(135deg, #268aff, #003db3); color: #fff; box-shadow: 0 5px 20px rgba(0,102,255,0.3); }
+        .divider { width: 85%; height: 1px; background: var(--border); margin: 5px 0; }
+        .input-field { padding: 13px; width: 85%; max-width: 300px; border-radius: 14px; border: 2px solid var(--border); background: var(--surface); color: white; text-align: center; font-size: 0.95rem; outline: none; }
+
+        #status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #555; margin-right: 6px; vertical-align: middle; }
+        #status-dot.connecting { background: var(--yellow); animation: blink 1s infinite; }
+        #status-dot.connected { background: var(--green); animation: none; }
+        #status-dot.error { background: var(--red); animation: none; }
+        @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.2; } }
+
+        #header { background: var(--surface); padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); min-height: 48px; flex-shrink: 0; }
+        #header-text { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; font-weight: 700; color: #fff; }
+        #header-text.my-turn { color: var(--gold); text-shadow: 0 0 10px rgba(255,204,0,0.4); }
+        #header-right { display: flex; gap: 8px; align-items: center; }
+        #host-force-start { padding: 6px 14px; font-size: 0.75rem; border-radius: 20px; border: none; background: linear-gradient(135deg, var(--green), #00aa40); color: #000; font-weight: 800; display: none; cursor: pointer; }
+        #rules-btn { padding: 6px 14px; font-size: 0.75rem; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: #aaa; font-weight: 800; cursor: pointer; }
+
+        #opponent-area { display: flex; flex-direction: column; align-items: center; padding: 6px 0 0; flex-shrink: 0; min-height: 110px; }
+        #opponent-info { font-size: 0.78rem; color: #aaa; font-weight: 700; background: var(--surface); padding: 4px 14px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 4px; }
+        #opponent-hand { display: flex; justify-content: center; overflow-x: auto; padding: 6px 15px; min-height: 76px; align-items: center; width: 100%; scrollbar-width: none; }
+        #opponent-hand::-webkit-scrollbar { display: none; }
+
+        #center { flex: 1; display: flex; justify-content: center; align-items: center; gap: 30px; padding: 5px; }
+        .center-stack { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .stack-label { font-size: 0.7rem; color: #666; font-weight: 700; text-transform: uppercase; }
+        #target-color-indicator { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.9); }
+        #active-color-label { font-size: 0.75rem; color: #aaa; font-weight: 900; text-transform: uppercase; }
+
+        #uno-btn { width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle, #ff2222, #aa0000); border: 3px solid var(--gold); display: flex; justify-content: center; align-items: center; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; font-weight: 900; color: white; cursor: pointer; animation: pulse 2.5s infinite; }
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 15px rgba(255,51,51,0.4); } 50% { box-shadow: 0 0 30px rgba(255,51,51,0.7); } }
+
+        .card { width: var(--card-w); height: var(--card-h); border-radius: 10px; border: 2.5px solid #ffffff; display: flex; justify-content: center; align-items: center; font-weight: 900; font-size: 1.5rem; box-shadow: 0 6px 16px rgba(0,0,0,0.7); position: relative; flex-shrink: 0; overflow: hidden; }
+        .card::before { content: ''; position: absolute; width: 85%; height: 70%; background: rgba(255,255,255,0.94); border-radius: 50%; transform: rotate(-28deg); z-index: 1; }
+        .card span { z-index: 2; position: relative; color: #111; font-style: italic; font-size: 1.6rem; }
+        .card.color-red { background: linear-gradient(140deg, #ff414b 0%, #ad000a 100%); }
+        .card.color-blue { background: linear-gradient(140deg, #268aff 0%, #003db3 100%); }
+        .card.color-green { background: linear-gradient(140deg, #00ff66 0%, #006625 100%); }
+        .card.color-yellow { background: linear-gradient(140deg, #ffe600 0%, #b3a200 100%); }
+        .card.color-black { background: radial-gradient(circle at 30% 30%, #444, #000); }
+        .card.color-black::before { background: conic-gradient(var(--red) 0deg, var(--blue) 90deg, var(--green) 180deg, var(--yellow) 270deg, var(--red) 360deg); opacity: 1; }
+        .card.color-black span { color: white; text-shadow: 0 2px 4px #000; }
+        .card.back { background: radial-gradient(circle at 35% 35%, #ff2a35, #550005); cursor: pointer; }
+        .card.back::before { display: none; }
+        .card.back::after { content: 'UNO'; color: var(--gold); font-family: 'Orbitron', sans-serif; font-size: 0.85rem; font-weight: 900; transform: rotate(-25deg); z-index: 2; position: relative; text-shadow: 0 0 8px rgba(255,223,0,0.8); }
+        .card-corner-tl, .card-corner-br { position: absolute; font-size: 0.75rem; font-weight: 900; color: #111; z-index: 3; }
+        .card-corner-tl { top: 5px; left: 6px; }
+        .card-corner-br { bottom: 5px; right: 6px; transform: rotate(180deg); }
+        .card.color-black .card-corner-tl, .card.color-black .card-corner-br { color: white; }
+
+        #my-hand { display: flex; overflow-x: auto; justify-content: center; padding: 14px 20px; min-height: 130px; align-items: flex-end; width: 100%; background: rgba(0,0,0,0.4); border-top: 1px solid var(--border); scrollbar-width: none; flex-shrink: 0; }
+        #my-hand::-webkit-scrollbar { display: none; }
+        #my-hand.your-turn { border-top-color: var(--gold); background: rgba(255,223,0,0.05); }
+        #my-hand .card { margin-right: -18px; cursor: pointer; }
+        #my-hand .card:hover { transform: translateY(-22px) scale(1.08); margin-right: -6px; z-index: 50; }
+        #opponent-hand .card.back { width: 42px; height: 62px; margin-right: -14px; font-size: 0.5rem; }
+        #opponent-hand .card.back::after { font-size: 0.5rem; }
+
+        .overlay-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--surface); padding: 25px; border-radius: 20px; border: 1px solid var(--border); z-index: 2000; text-align: center; width: 88%; max-width: 340px; }
+        .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        .color-btn { height: 70px; border-radius: 14px; border: 3px solid rgba(255,255,255,0.9); cursor: pointer; }
+        .color-btn.red { background: linear-gradient(140deg, #ff414b, #ad000a); }
+        .color-btn.blue { background: linear-gradient(140deg, #268aff, #003db3); }
+        .color-btn.green { background: linear-gradient(140deg, #00ff66, #006625); }
+        .color-btn.yellow { background: linear-gradient(140deg, #ffe600, #b3a200); }
+
+        /* Rules overlay */
+        #rules-panel { max-width: 420px; max-height: 80vh; overflow-y: auto; text-align: left; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+        #rules-panel h2 { font-family: 'Orbitron', sans-serif; color: var(--gold); text-align: center; font-size: 1.2rem; margin-bottom: 16px; }
+        .rules-section { margin-bottom: 14px; }
+        .rules-section h3 { font-size: 0.8rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+        .rules-section p, .rules-section li { font-size: 0.82rem; color: #ccc; line-height: 1.55; }
+        .rules-section ul { padding-left: 18px; }
+        .rules-section li { margin-bottom: 4px; }
+        .card-tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 900; margin-right: 4px; }
+        .tag-red { background: var(--red); color: #fff; }
+        .tag-blue { background: var(--blue); color: #fff; }
+        .tag-green { background: var(--green); color: #000; }
+        .tag-yellow { background: var(--yellow); color: #000; }
+        .tag-black { background: #333; color: var(--gold); border: 1px solid #555; }
+
+        #chat-box { width: 94%; max-width: 400px; background: rgba(18,22,32,0.85); margin: 4px auto; border-radius: 12px; border: 1px solid var(--border); flex-shrink: 0; overflow: hidden; }
+        #chat-messages { height: 52px; overflow-y: auto; padding: 6px 10px; font-size: 0.78rem; color: #ccc; }
+        #chat-input-area { display: flex; border-top: 1px solid var(--border); }
+        #chat-input { flex: 1; background: transparent; border: none; color: white; padding: 8px 12px; font-size: 0.82rem; outline: none; }
+        #chat-btn { background: var(--blue); border: none; color: white; padding: 0 16px; font-weight: 800; cursor: pointer; }
+        .overlay-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1999; }
+
+        #toast-container { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+        .toast { background: var(--surface2); border: 1px solid var(--border); color: white; padding: 10px 20px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; opacity: 0; transform: translateY(-10px); transition: all 0.3s; white-space: nowrap; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.success { border-color: var(--green); color: var(--green); }
+        .toast.warning { border-color: var(--yellow); color: var(--yellow); }
+        .toast.error { border-color: var(--red); color: var(--red); }
+    </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+<div class="overlay-bg" id="overlay-bg" onclick="closeAllOverlays()"></div>
+
+<div id="connection-panel">
+    <div class="logo">U<span>N</span>O</div>
+    <p class="subtitle">Peer to Peer</p>
+    <p id="peer-id-status"><span id="status-dot" class="connecting"></span>Connecting to server...</p>
+    <button class="btn" id="share-btn" style="display:none" onclick="copyRoomLink()">📋 Copy Invite Link</button>
+    <div id="retry-area" style="display:none; flex-direction:column; align-items:center; gap:10px;">
+        <p style="color:var(--red); font-size:0.85rem;">Could not connect to server.</p>
+        <button class="btn" onclick="retryConnect()">🔄 Retry</button>
+    </div>
+    <div class="divider"></div>
+    <p style="color:#666; font-size:0.8rem;">— OR JOIN A ROOM —</p>
+    <input type="text" id="join-id" class="input-field" placeholder="Paste Room ID or Link">
+    <button class="btn btn-green" onclick="joinRoom()">Connect & Play</button>
+    <button class="btn btn-blue" style="margin-top:4px;" onclick="showOverlay('rules-panel')">📖 How to Play</button>
+</div>
+
+<div id="header">
+    <span id="header-text">Connecting...</span>
+    <div id="header-right">
+        <button id="rules-btn" onclick="showOverlay('rules-panel')">📖 Rules</button>
+        <button id="host-force-start" onclick="hostForceStart()">⚡ Start Game</button>
+    </div>
+</div>
+
+<div id="opponent-area">
+    <div id="opponent-info">Opponent: Waiting...</div>
+    <div id="opponent-hand"></div>
+</div>
+
+<div id="center">
+    <div class="center-stack">
+        <div id="deck" class="card back" onclick="drawCardLogic()"></div>
+        <div class="stack-label" id="deck-count-text">DECK</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+        <div id="uno-btn" onclick="pressUno()">UNO!</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+            <div id="target-color-indicator" style="background:#666;"></div>
+            <div id="active-color-label">-</div>
+        </div>
+    </div>
+    <div class="center-stack">
+        <div id="discard" class="card"><span></span></div>
+        <div class="stack-label">DISCARD</div>
+    </div>
+</div>
+
+<!-- Color Picker -->
+<div class="overlay-panel" id="color-picker">
+    <h3>Choose a Color</h3>
+    <div class="color-grid">
+        <div class="color-btn red" onclick="selectColor('red')"></div>
+        <div class="color-btn blue" onclick="selectColor('blue')"></div>
+        <div class="color-btn green" onclick="selectColor('green')"></div>
+        <div class="color-btn yellow" onclick="selectColor('yellow')"></div>
+    </div>
+</div>
+
+<!-- Challenge Panel -->
+<div class="overlay-panel" id="challenge-panel">
+    <h3>Wild +4 was played!</h3>
+    <p style="color:#aaa; font-size:0.8rem; margin: 8px 0 14px;">Challenge if you think the opponent had a legal play.</p>
+    <div style="display:flex; gap:10px; justify-content:center;">
+        <button class="btn" onclick="handleChallenge(true)">⚔️ Challenge</button>
+        <button class="btn btn-green" onclick="handleChallenge(false)">✅ Accept</button>
+    </div>
+</div>
+
+<!-- Rules Panel -->
+<div class="overlay-panel" id="rules-panel">
+    <h2>📖 UNO Rules</h2>
+
+    <div class="rules-section">
+        <h3>Objective</h3>
+        <p>Be the first player to get rid of all your cards. The first player with <strong>0 cards</strong> wins!</p>
+    </div>
+
+    <div class="rules-section">
+        <h3>How to Play</h3>
+        <ul>
+            <li>Each player starts with <strong>7 cards</strong>.</li>
+            <li>On your turn, play a card that matches the <strong>top card's color or value</strong>.</li>
+            <li>If you can't play, <strong>draw from the deck</strong>. If the drawn card is playable, it plays automatically.</li>
+            <li>If the drawn card still can't be played, your turn passes.</li>
+        </ul>
+    </div>
+
+    <div class="rules-section">
+        <h3>Special Cards</h3>
+        <ul>
+            <li><strong>🚫 Skip</strong> — In 2-player, your turn continues (opponent is skipped).</li>
+            <li><strong>🔄 Reverse</strong> — In 2-player, acts like a Skip; your turn continues.</li>
+            <li><strong>+2</strong> — Opponent draws 2 cards and loses their turn.</li>
+            <li><span class="card-tag tag-black">WILD</span> — Change the active color to any color you choose.</li>
+            <li><span class="card-tag tag-black">+4</span> — Change color AND opponent draws 4 cards. Can only be played legally if you have NO cards matching the current color.</li>
+        </ul>
+    </div>
+
+    <div class="rules-section">
+        <h3>Wild +4 Challenge</h3>
+        <p>When your opponent plays Wild +4, you can <strong>challenge</strong> them. If they had a card matching the current color (meaning the +4 was illegal), they draw 4 instead of you. If the play was legal, you draw 6.</p>
+    </div>
+
+    <div class="rules-section">
+        <h3>UNO Button</h3>
+        <ul>
+            <li>When you are down to <strong>1 card</strong>, tap <strong>UNO!</strong> before playing it.</li>
+            <li>If you forget to say UNO and your opponent catches you, <strong>you draw 2 penalty cards</strong>.</li>
+            <li>Tap UNO! when your opponent has 1 card to <strong>catch them</strong> — they draw 2!</li>
+        </ul>
+    </div>
+
+    <div class="rules-section">
+        <h3>Winning</h3>
+        <p>Play your last card and you win! Make sure you said <strong>UNO!</strong> first, or you'll receive a 2-card penalty and the game continues.</p>
+    </div>
+
+    <div class="rules-section">
+        <h3>How to Start a Game</h3>
+        <ul>
+            <li><strong>Host:</strong> Copy your invite link and share it. Once opponent connects, press ⚡ Start Game.</li>
+            <li><strong>Guest:</strong> Paste the link or Room ID and click Connect & Play.</li>
+        </ul>
+    </div>
+
+    <div style="text-align:center; margin-top:16px;">
+        <button class="btn" onclick="hideOverlay('rules-panel')">Got it!</button>
+    </div>
+</div>
+
+<div id="chat-box">
+    <div id="chat-messages"></div>
+    <div id="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Message...">
+        <button id="chat-btn" onclick="sendChatMessage()">Send</button>
+    </div>
+</div>
+
+<div id="my-hand"></div>
+
+<script>
+const PEER_SERVERS = [
+    { host: '0.peerjs.com', port: 443, path: '/', secure: true },
+    { host: 'peerjs.medooze.com', port: 443, path: '/', secure: true },
+];
+
+const ICE_SERVERS = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun.cloudflare.com:3478' },
+    { urls: 'turn:openrelay.metered.ca:80',  username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject', urls: 'turns:openrelay.metered.ca:443' },
+];
+
+let peer, conn;
+let myId = '', isHost = false, role = 'guest';
+let hasSaidUno = false, pendingWildPlus4 = false, drawCountThisTurn = 0;
+let serverIdx = 0;
+let connectTimeout = null;
+
+let gameState = { deck: [], discardPile: [], activeColor: '', p1Hand: [], p2Hand: [], turn: 'host' };
+
+function showToast(msg, type = 'info') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'toast' + (type === 'success' ? ' success' : type === 'warning' ? ' warning' : type === 'error' ? ' error' : '');
+    t.innerText = msg; c.appendChild(t);
+    setTimeout(() => t.classList.add('show'), 50);
+    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+function setStatus(text, state) {
+    document.getElementById('peer-id-status').innerHTML = `<span id="status-dot" class="${state || 'connecting'}"></span>${text}`;
+}
+
+function initP2P() {
+    setStatus('Connecting to server...', 'connecting');
+    document.getElementById('retry-area').style.display = 'none';
+
+    const cfg = PEER_SERVERS[serverIdx % PEER_SERVERS.length];
+
+    try {
+        peer = new Peer(undefined, { ...cfg, config: { iceServers: ICE_SERVERS } });
+    } catch(e) {
+        showToast('Could not create peer: ' + e.message, 'error');
+        showRetry(); return;
+    }
+
+    connectTimeout = setTimeout(() => {
+        setStatus('Server timed out.', 'error');
+        showRetry();
+        try { peer.destroy(); } catch(e) {}
+    }, 8000);
+
+    peer.on('open', (id) => {
+        clearTimeout(connectTimeout);
+        myId = id;
+        setStatus(`Room ID: <b style="color:var(--gold)">${id}</b>`, 'connected');
+        document.getElementById('share-btn').style.display = 'block';
+
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('room')) {
+            document.getElementById('join-id').value = params.get('room');
+            setTimeout(joinRoom, 800);
+        }
+    });
+
+    peer.on('connection', (c) => {
+        conn = c; isHost = true; role = 'host';
+        setupConnection();
+    });
+
+    peer.on('error', (err) => {
+        clearTimeout(connectTimeout);
+        console.error('Peer error:', err);
+        const msg = err.type === 'peer-unavailable'
+            ? 'Room not found. Check the ID.'
+            : err.type === 'network'
+            ? 'Network error. Check your internet connection.'
+            : err.type === 'server-error' || err.type === 'socket-error'
+            ? 'Server error. Retrying...'
+            : 'Error: ' + err.type;
+
+        showToast(msg, 'error');
+
+        if (err.type === 'server-error' || err.type === 'socket-error' || err.type === 'unavailable-id') {
+            serverIdx++;
+            setTimeout(initP2P, 2000);
+        } else if (err.type !== 'peer-unavailable') {
+            showRetry();
+        }
+    });
+
+    peer.on('disconnected', () => {
+        setStatus('Server connection lost. Reconnecting...', 'connecting');
+        try { peer.reconnect(); } catch(e) { showRetry(); }
+    });
+}
+
+function showRetry() {
+    document.getElementById('retry-area').style.display = 'flex';
+}
+
+function retryConnect() {
+    document.getElementById('retry-area').style.display = 'none';
+    try { if(peer) peer.destroy(); } catch(e) {}
+    setTimeout(initP2P, 300);
+}
+
+function copyRoomLink() {
+    const link = `${location.origin}${location.pathname}?room=${myId}`;
+    navigator.clipboard.writeText(link).catch(() => {});
+    showToast('Link copied! ' + myId, 'success');
+}
+
+function joinRoom() {
+    let val = document.getElementById('join-id').value.trim();
+    if (val.includes('?room=')) val = val.split('?room=')[1].split('&')[0];
+    if (!val) return showToast('Enter a valid Room ID!', 'warning');
+    if (!peer || peer.destroyed) return showToast('Connect to server first (wait for green dot).', 'warning');
+    if (!myId) return showToast('Server not ready yet. Wait a moment.', 'warning');
+
+    isHost = false; role = 'guest';
+    setStatus('Joining room...', 'connecting');
+
+    conn = peer.connect(val.trim(), { reliable: true, serialization: 'json' });
+    setupConnection();
+
+    const t = setTimeout(() => {
+        if (!conn || !conn.open) {
+            showToast('Connection timed out. Is the ID correct? Is the host still online?', 'error');
+            setStatus(`Room ID: <b style="color:var(--gold)">${myId}</b>`, 'connected');
+        }
+    }, 10000);
+    conn._joinTimeout = t;
+}
+
+function setupConnection() {
+    conn.on('open', () => {
+        clearTimeout(conn._joinTimeout);
+        document.getElementById('connection-panel').style.display = 'none';
+        if (isHost) {
+            document.getElementById('host-force-start').style.display = 'block';
+            showToast('Opponent connected! Press Start Game.', 'success');
+        } else {
+            showToast('Connected! Waiting for host to start...', 'success');
+            setTimeout(() => { if (conn && conn.open) conn.send({ type: 'guest-ready' }); }, 400);
+        }
+    });
+
+    conn.on('data', (data) => {
+        if (data.type === 'guest-ready' && isHost) {
+            showToast('Opponent is ready!', 'success');
+            return;
+        }
+        if (data.type === 'game-state' || data.type === 'new-game') {
+            gameState = data.state;
+            if (data.msgContext) showToast(data.msgContext);
+            if (amITurn()) drawCountThisTurn = 0;
+            if (data.triggerChallenge && amITurn()) showOverlay('challenge-panel');
+            updateUI();
+            return;
+        }
+        if (data.type === 'chat') {
+            appendChatMessage(data.sender === 'host' ? 'Host' : 'Opponent', data.text);
+        }
+    });
+
+    conn.on('error', (err) => showToast('Connection error: ' + err.type, 'error'));
+    conn.on('close', () => {
+        showToast('Opponent disconnected.', 'error');
+        document.getElementById('header-text').innerText = 'Connection Lost';
+    });
+}
+
+function amITurn() { return (role === 'host' && gameState.turn === 'host') || (role === 'guest' && gameState.turn === 'guest'); }
+function myHand()  { return role === 'host' ? gameState.p1Hand : gameState.p2Hand; }
+function oppHand() { return role === 'host' ? gameState.p2Hand : gameState.p1Hand; }
+function nextTurn(){ return gameState.turn === 'host' ? 'guest' : 'host'; }
+
+function startNewGame() {
+    const colors = ['red','blue','green','yellow'];
+    let deck = [];
+    colors.forEach(c => {
+        deck.push({ color: c, value: '0' });
+        for (let i = 1; i <= 9; i++) {
+            deck.push({ color: c, value: String(i) }, { color: c, value: String(i) });
+        }
+        ['🚫','🔄','+2'].forEach(a => { deck.push({ color: c, value: a }, { color: c, value: a }); });
+    });
+    for (let i = 0; i < 4; i++) { deck.push({ color: 'black', value: 'WILD' }, { color: 'black', value: '+4' }); }
+    deck.sort(() => Math.random() - 0.5);
+
+    const p1Hand = deck.splice(0, 7);
+    const p2Hand = deck.splice(0, 7);
+    let topCard = deck.pop();
+    while (topCard.color === 'black') { deck.unshift(topCard); topCard = deck.pop(); }
+
+    gameState = { deck, discardPile: [topCard], activeColor: topCard.color, p1Hand, p2Hand, turn: 'host' };
+    hasSaidUno = false; drawCountThisTurn = 0;
+    broadcastState('new-game', 'Game Started!');
+}
+
+function hostForceStart() {
+    document.getElementById('host-force-start').style.display = 'none';
+    startNewGame();
+}
+
+function broadcastState(type = 'game-state', msgContext = '', triggerChallenge = false) {
+    if (conn && conn.open) conn.send({ type, state: gameState, msgContext, triggerChallenge });
+    updateUI();
+}
+
+function playCard(idx) {
+    if (!amITurn()) return;
+    const hand = myHand();
+    const card = hand[idx];
+    const top  = gameState.discardPile[gameState.discardPile.length - 1];
+    const valid = card.color === 'black' || card.color === gameState.activeColor || card.value === top.value;
+    if (!valid) return showToast('Invalid! Must match color or value.', 'warning');
+
+    if (card.value === '+4') card.illegalPlayed = hand.some(c => c.color === gameState.activeColor && c.color !== 'black');
+
+    hand.splice(idx, 1);
+    gameState.discardPile.push(card);
+    gameState.activeColor = card.color;
+
+    if (hand.length === 0) {
+        if (!hasSaidUno) { showToast('You forgot to say UNO! +2 penalty.', 'warning'); drawN(hand, 2); }
+        else { showToast('🎉 YOU WIN!', 'success'); broadcastState('game-state', '🎉 Opponent wins!'); setTimeout(() => location.reload(), 3000); return; }
+    }
+
+    if (card.color === 'black') { pendingWildPlus4 = card.value === '+4'; showOverlay('color-picker'); return; }
+    applyAction(card.value);
+}
+
+function applyAction(value) {
+    if (value === '+2') {
+        drawN(oppHand(), 2);
+        gameState.turn = nextTurn();
+        broadcastState('game-state', '🃏 Opponent drew +2!');
+    } else if (value === '🚫' || value === '🔄') {
+        gameState.turn = role === 'host' ? 'host' : 'guest';
+        broadcastState('game-state', value === '🚫' ? '🚫 Skip!' : '🔄 Reverse!');
+    } else {
+        gameState.turn = nextTurn();
+        broadcastState('game-state');
+    }
+}
+
+function selectColor(color) {
+    gameState.activeColor = color;
+    hideOverlay('color-picker');
+    gameState.turn = nextTurn();
+    broadcastState('game-state', `Color: ${color.toUpperCase()}`, pendingWildPlus4);
+    pendingWildPlus4 = false;
+}
+
+function handleChallenge(challenge) {
+    hideOverlay('challenge-panel');
+    const last = gameState.discardPile[gameState.discardPile.length - 1];
+    if (challenge) {
+        if (last.illegalPlayed) { drawN(oppHand(), 4); showToast('Challenge won! Opponent drew 4.', 'success'); }
+        else { drawN(myHand(), 6); showToast('Challenge failed! You drew 6.', 'warning'); }
+    } else { drawN(myHand(), 4); showToast('Accepted. You drew 4.', 'warning'); }
+    gameState.turn = nextTurn();
+    broadcastState('game-state', 'Challenge resolved.');
+}
+
+function drawCardLogic() {
+    if (!amITurn()) return;
+    if (gameState.deck.length === 0) return showToast('Deck is empty!', 'warning');
+    const hand = myHand();
+    drawCountThisTurn++;
+    const drawn = gameState.deck.pop();
+    hand.push(drawn);
+    hasSaidUno = false;
+    const top = gameState.discardPile[gameState.discardPile.length - 1];
+    const canPlay = drawn.color === 'black' || drawn.color === gameState.activeColor || drawn.value === top.value;
+    if (canPlay) { updateUI(); setTimeout(() => playCard(hand.length - 1), 300); }
+    else if (drawCountThisTurn === 1) { showToast('No match. You may draw once more.', 'warning'); broadcastState('game-state'); }
+    else { drawCountThisTurn = 0; gameState.turn = nextTurn(); broadcastState('game-state', 'Opponent passed.'); }
+}
+
+function pressUno() {
+    const hand = myHand(), opp = oppHand();
+    if (hand.length === 1) { hasSaidUno = true; showToast('📢 UNO!', 'success'); }
+    else if (opp.length === 1) { drawN(opp, 2); showToast('🎯 Caught them! Opponent draws 2.', 'success'); broadcastState('game-state', 'Caught without UNO! +2 drawn.'); }
+}
+
+function drawN(hand, n) { for (let i = 0; i < n; i++) { if (gameState.deck.length > 0) hand.push(gameState.deck.pop()); } }
+
+function updateUI() {
+    if (!gameState.discardPile || !gameState.discardPile.length) return;
+    const isMyTurn = amITurn();
+    const hand = myHand(), opp = oppHand();
+
+    const ht = document.getElementById('header-text');
+    ht.innerText = isMyTurn ? 'YOUR TURN!' : "Opponent's turn...";
+    ht.className = isMyTurn ? 'my-turn' : '';
+
+    document.getElementById('opponent-info').innerText = `Opponent: ${opp ? opp.length : 0} Card${opp && opp.length !== 1 ? 's' : ''}`;
+
+    const top = gameState.discardPile[gameState.discardPile.length - 1];
+    const dd = document.getElementById('discard');
+    dd.className = `card color-${gameState.activeColor}`;
+    dd.innerHTML = `<span>${top.value}</span>`;
+    addCorners(dd, top);
+
+    const colorMap = { red: 'var(--red)', blue: 'var(--blue)', green: 'var(--green)', yellow: 'var(--yellow)' };
+    document.getElementById('target-color-indicator').style.background = colorMap[gameState.activeColor] || '#666';
+    document.getElementById('active-color-label').innerText = gameState.activeColor.toUpperCase();
+    document.getElementById('deck-count-text').innerText = `DECK (${gameState.deck.length})`;
+
+    const mh = document.getElementById('my-hand');
+    mh.innerHTML = '';
+    mh.classList.toggle('your-turn', isMyTurn);
+    (hand || []).forEach((card, idx) => {
+        const el = document.createElement('div');
+        el.className = `card color-${card.color}`;
+        el.innerHTML = `<span>${card.value}</span>`;
+        addCorners(el, card);
+        el.onclick = () => { if (amITurn()) playCard(idx); };
+        mh.appendChild(el);
+    });
+
+    const oh = document.getElementById('opponent-hand');
+    oh.innerHTML = '';
+    (opp || []).forEach(() => { const el = document.createElement('div'); el.className = 'card back'; oh.appendChild(el); });
+}
+
+function addCorners(el, card) {
+    const lbl = card.value === 'WILD' ? '★' : card.value;
+    ['card-corner-tl','card-corner-br'].forEach(cls => {
+        const d = document.createElement('div'); d.className = cls; d.innerText = lbl; el.appendChild(d);
+    });
+}
+
+function showOverlay(id) { document.getElementById(id).style.display = 'block'; document.getElementById('overlay-bg').style.display = 'block'; }
+function hideOverlay(id) { document.getElementById(id).style.display = 'none'; document.getElementById('overlay-bg').style.display = 'none'; }
+function closeAllOverlays() {
+    ['color-picker','challenge-panel','rules-panel'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+    });
+    document.getElementById('overlay-bg').style.display = 'none';
+}
+
+function sendChatMessage() {
+    const inp = document.getElementById('chat-input'), text = inp.value.trim();
+    if (!text || !conn || !conn.open) return;
+    conn.send({ type: 'chat', text, sender: role });
+    appendChatMessage('You', text); inp.value = '';
+}
+function appendChatMessage(sender, text) {
+    const box = document.getElementById('chat-messages'), p = document.createElement('p');
+    p.innerHTML = `<b style="color:${sender==='You'?'var(--green)':'var(--red)'}">${sender}:</b> ${text}`;
+    box.appendChild(p); box.scrollTop = box.scrollHeight;
+}
+document.getElementById('chat-input').addEventListener('keypress', e => { if (e.key === 'Enter') sendChatMessage(); });
+
+initP2P();
+</script>
+</body>
+</html>
