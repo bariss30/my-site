@@ -156,16 +156,22 @@ const questions=[
 
 
 ];
-const tagLabel={concept:"Kavram",apply:"Uygulama",analyze:"Analiz"};
-const tagClass={concept:"tag-concept",apply:"tag-apply",analyze:"tag-analyze"};
+const tagLabel={concept:"Kavram",apply:"Uygulama",analyze:"Analiz",mixed:"Karma"}; // "mixed" etiketi de eklendi
+const tagClass={concept:"tag-concept",apply:"tag-apply",analyze:"tag-analyze",mixed:"tag-concept"};
 const letters=["A","B","C","D"];
-const userAnswers=new Array(20).fill(-1);
+
+// SABİT 20 YERİNE: Dinamik olarak soru sayısı kadar dizi oluşturuyoruz
+const userAnswers=new Array(questions.length).fill(-1); 
 
 function render(){
 const c=document.getElementById("questions");c.innerHTML="";
 questions.forEach((q,qi)=>{
 const b=document.createElement("div");b.className="qblock";b.id="q"+qi;
-b.innerHTML=`<div class="qheader"><div class="qnum">${qi+1}</div><div class="qtext">${q.text}</div><span class="qtag ${tagClass[q.tag]}">${tagLabel[q.tag]}</span></div><div class="opts" id="opts${qi}"></div><div class="exp" id="exp${qi}">${q.exp}</div>`;
+// Güvenli etiket kontrolü
+const currentTagClass = tagClass[q.tag] || "tag-concept";
+const currentTagLabel = tagLabel[q.tag] || "Genel";
+
+b.innerHTML=`<div class="qheader"><div class="qnum">${qi+1}</div><div class="qtext">${q.text}</div><span class="qtag ${currentTagClass}">${currentTagLabel}</span></div><div class="opts" id="opts${qi}"></div><div class="exp" id="exp${qi}">${q.exp}</div>`;
 c.appendChild(b);
 const opts=document.getElementById("opts"+qi);
 q.opts.forEach((o,oi)=>{
@@ -175,6 +181,10 @@ d.innerHTML=`<div class="opt-letter">${letters[oi]}</div><span>${o}</span>`;
 d.onclick=()=>selectOpt(qi,oi);opts.appendChild(d);
 });
 });
+
+// Arayüzdeki toplam soru sayısını da dinamik güncelleyelim
+document.querySelector(".stat-val").textContent = questions.length;
+document.querySelector(".subtitle").textContent = `${questions.length} soru · Çoktan seçmeli · Her soru ${Math.round(100/questions.length)} puan`;
 }
 
 function selectOpt(qi,oi){
@@ -192,10 +202,12 @@ updateStats();
 function updateStats(){
 const ans=userAnswers.filter(a=>a!==-1&&a!==-2).length;
 const cor=userAnswers.filter((a,i)=>a===questions[i].ans).length;
+const singleScore = 100 / questions.length; // Soru başına dinamik puan
+
 document.getElementById("s-answered").textContent=ans;
 document.getElementById("s-correct").textContent=cor;
-document.getElementById("s-score").textContent=cor*5;
-document.getElementById("progress").style.width=Math.round(userAnswers.filter(a=>a!==-1).length/20*100)+"%";
+document.getElementById("s-score").textContent=Math.round(cor*singleScore);
+document.getElementById("progress").style.width=Math.round(userAnswers.filter(a=>a!==-1).length/questions.length*100)+"%";
 }
 
 function checkAll(){
@@ -220,8 +232,10 @@ function showResult(){
 const cor=userAnswers.filter((a,i)=>a!==-1&&a!==-2&&a===questions[i].ans).length;
 const ans=userAnswers.filter(a=>a!==-1&&a!==-2).length;
 const pct=ans?Math.round(cor/ans*100):0;
+const singleScore = 100 / questions.length;
+
 let msg=pct>=85?"Mükemmel! Konulara çok iyi hakimsiniz.":pct>=70?"İyi bir performans. Birkaç konuya tekrar bakabilirsiniz.":pct>=50?"Orta düzey. Konuları tekrar gözden geçirmenizi öneririm.":"Daha fazla çalışma gerekiyor. Notlarınızı tekrar okuyun.";
-document.getElementById("result-box").innerHTML=`<div class="result"><div class="result-score">${cor*5} / 100</div><div style="font-size:16px;font-weight:500;margin-bottom:8px">${cor} / ${ans} doğru cevap</div><div class="result-msg">${msg}</div></div>`;
+document.getElementById("result-box").innerHTML=`<div class="result"><div class="result-score">${Math.round(cor*singleScore)} / 100</div><div style="font-size:16px;font-weight:500;margin-bottom:8px">${cor} / ${ans} doğru cevap</div><div class="result-msg">${msg}</div></div>`;
 document.getElementById("result-box").scrollIntoView({behavior:"smooth"});
 }
 
