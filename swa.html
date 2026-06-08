@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metin Madenciliği — Ders Notları</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;
+  --bg2:#181c27;
+  --bg3:#1e2333;
+  --border:#2a3045;
+  --text:#e8eaf0;
+  --text2:#9aa0b8;
+  --accent:#5b8fff;
+  --accent2:#ff6b9d;
+  --accent3:#4ecca3;
+  --accent4:#ffd166;
+  --accent5:#a78bfa;
+  --accent6:#fb923c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px}
+/* TOP NAV */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px;position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:12px}
+.topbar-title{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--accent);font-weight:600;letter-spacing:.5px}
+.topbar-badge{font-size:10px;background:var(--accent);color:#fff;padding:2px 8px;border-radius:20px;font-weight:600;margin-left:auto}
+/* LAYOUT */
+.layout{display:flex;min-height:100vh}
+/* SIDEBAR */
+.sidebar{width:240px;background:var(--bg2);border-right:1px solid var(--border);padding:20px 0;position:sticky;top:49px;height:calc(100vh - 49px);overflow-y:auto;flex-shrink:0}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.nav-section{padding:8px 16px 4px;font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:8px}
+.nav-item{display:block;padding:6px 16px 6px 20px;font-size:13px;color:var(--text2);text-decoration:none;border-left:2px solid transparent;transition:all .15s;cursor:pointer}
+.nav-item:hover,.nav-item.active{color:var(--text);border-left-color:var(--accent);background:rgba(91,143,255,.06)}
+/* MAIN */
+.main{flex:1;padding:32px 24px;max-width:860px;overflow-x:hidden}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{padding:20px 16px;max-width:100%}
+  .topbar{padding:10px 16px}
+}
+/* SECTION */
+.section{margin-bottom:48px;scroll-margin-top:60px}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.section-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 8px;border-radius:4px;font-weight:600;letter-spacing:.5px}
+.tag-blue{background:rgba(91,143,255,.15);color:var(--accent)}
+.tag-pink{background:rgba(255,107,157,.15);color:var(--accent2)}
+.tag-green{background:rgba(78,204,163,.15);color:var(--accent3)}
+.tag-yellow{background:rgba(255,209,102,.15);color:var(--accent4)}
+.tag-purple{background:rgba(167,139,250,.15);color:var(--accent5)}
+.tag-orange{background:rgba(251,146,60,.15);color:var(--accent6)}
+.section-title{font-size:20px;font-weight:600;color:var(--text)}
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px;font-family:'IBM Plex Mono',monospace}
+.card p{font-size:14px;color:var(--text2);margin-bottom:6px}
+.card p:last-child{margin-bottom:0}
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}}
+/* EXAMPLE BOX */
+.example{background:var(--bg3);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:10px 14px;margin:10px 0;font-size:13px;color:var(--text2)}
+.example strong{color:var(--accent3);font-size:12px;display:block;margin-bottom:4px;font-family:'IBM Plex Mono',monospace}
+/* FORMULA */
+.formula{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin:10px 0;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--accent4)}
+.formula .flabel{font-size:11px;color:var(--text2);margin-bottom:4px;font-family:'IBM Plex Sans',sans-serif}
+/* LIST */
+.dot-list{list-style:none;padding:0}
+.dot-list li{padding:4px 0 4px 16px;position:relative;font-size:14px;color:var(--text2)}
+.dot-list li::before{content:'▸';position:absolute;left:0;color:var(--accent);font-size:11px;top:5px}
+/* COMPARE TABLE */
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+.cmp-table th{background:var(--bg3);padding:8px 12px;text-align:left;color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:11px;border-bottom:1px solid var(--border)}
+.cmp-table td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+.cmp-table tr:last-child td{border-bottom:none}
+/* TAG ROW */
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tag-item{font-size:12px;padding:3px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
+/* HIGHLIGHT */
+.hl{color:var(--accent4);font-weight:600}
+.hl-g{color:var(--accent3);font-weight:600}
+.hl-b{color:var(--accent);font-weight:600}
+.hl-p{color:var(--accent5);font-weight:600}
+/* STEP LIST */
+.step-list{counter-reset:steps;list-style:none;padding:0}
+.step-list li{counter-increment:steps;display:flex;gap:10px;padding:6px 0;font-size:14px;color:var(--text2)}
+.step-list li::before{content:counter(steps);background:var(--accent);color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;font-family:'IBM Plex Mono',monospace}
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+/* BACK TO TOP */
+.back-top{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(91,143,255,.4);z-index:200}
+@media(max-width:768px){.back-top{bottom:16px;right:16px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">// metin-madenciligi</span>
+  <span class="topbar-badge">Final Notları</span>
+</div>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="nav-section">Ön İşleme</div>
+  <a class="nav-item" onclick="scrollTo('onisleme')">Teknikler</a>
+  <a class="nav-item" onclick="scrollTo('stemlem')">Stemming vs Lemmatization</a>
+
+  <div class="nav-section">Sayısallaştırma</div>
+  <a class="nav-item" onclick="scrollTo('bow')">Bag of Words</a>
+  <a class="nav-item" onclick="scrollTo('tfidf')">TF-IDF</a>
+  <a class="nav-item" onclick="scrollTo('embedding')">Word Embedding</a>
+  <a class="nav-item" onclick="scrollTo('word2vec')">Word2Vec (CBOW & SG)</a>
+  <a class="nav-item" onclick="scrollTo('glove')">GloVe</a>
+  <a class="nav-item" onclick="scrollTo('fasttext')">FastText</a>
+  <a class="nav-item" onclick="scrollTo('transformer')">Transformer Embedding</a>
+
+  <div class="nav-section">Özet Çıkarma</div>
+  <a class="nav-item" onclick="scrollTo('ozet')">Extractive & Abstractive</a>
+
+  <div class="nav-section">Duygu Analizi</div>
+  <a class="nav-item" onclick="scrollTo('duygu')">Türler & Yöntemler</a>
+  <a class="nav-item" onclick="scrollTo('turkce')">Türkçe Zorlukları</a>
+
+  <div class="nav-section">Spam Tespiti</div>
+  <a class="nav-item" onclick="scrollTo('spam')">Özellikler & Yöntemler</a>
+
+  <div class="nav-section">Metin Sınıflandırma</div>
+  <a class="nav-item" onclick="scrollTo('sinif')">Türler & Problemler</a>
+
+  <div class="nav-section">İntihal Tespiti</div>
+  <a class="nav-item" onclick="scrollTo('intihal')">Yöntemler & Ölçütler</a>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ─── ÖN İŞLEME ─── -->
+<section class="section" id="onisleme">
+  <div class="section-header">
+    <span class="section-tag tag-green">01</span>
+    <h2 class="section-title">Ön İşleme Teknikleri</h2>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Tokenization</div>
+      <p>Metni kelime veya cümlelere ayırma işlemidir.</p>
+      <div class="example"><strong>Örnek</strong>"Bu çalışmada yapay zekâ kullanıldı" → [Bu] [çalışmada] [yapay] [zekâ] [kullanıldı]</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Lowercasing</div>
+      <p>Tüm metni küçük harfe çevirme.</p>
+      <div class="example"><strong>Örnek</strong>"Yapay Zekâ" → "yapay zekâ"</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Stop-word Removal</div>
+      <p>"ve", "ile", "bir" gibi anlamsal katkısı düşük kelimeleri kaldırma.</p>
+      <div class="example"><strong>Örnek</strong>"bu ve şu" → analizden çıkar</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Punctuation & Number Removal</div>
+      <p>Noktalama işaretleri ve sayıların temizlenmesi.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Normalization</div>
+      <p>Farklı yazımları standart forma getirme.</p>
+      <div class="example"><strong>Örnek</strong>"slm", "slmm", "selamm" → "selam"</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Spell Correction</div>
+      <p>Yazım hatalarını düzeltme. Sosyal medya verilerinde kritik.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">HTML Tag Removal</div>
+      <p>Web kaynaklı metinlerdeki &lt;p&gt;, &lt;br&gt; gibi etiketleri temizleme.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Emoji Removal / Handling</div>
+      <p>Emoji ve sembolleri kaldırma veya metne dönüştürme.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">N-gram Oluşturma</div>
+    <p>Ardışık kelime grupları üretir. Tek kelimelerle kaçırılan ifadeleri yakalar.</p>
+    <div class="example"><strong>Bigram (2-gram) — "yapay zekâ sağlıkta kullanılır"</strong>"yapay zekâ" · "zekâ sağlıkta" · "sağlıkta kullanılır"</div>
+    <div class="example"><strong>Spam'de neden önemli?</strong>"ödül kazandınız" · "hemen tıklayın" · "hesabınız askıya alındı" → tek kelimeden daha güçlü sinyal</div>
+  </div>
+</section>
+
+<!-- ─── STEMMING / LEMMA ─── -->
+<section class="section" id="stemlem">
+  <div class="section-header">
+    <span class="section-tag tag-green">02</span>
+    <h2 class="section-title">Stemming vs Lemmatization</h2>
+  </div>
+  <table class="cmp-table">
+    <tr><th>Özellik</th><th>Stemming</th><th>Lemmatization</th></tr>
+    <tr><td>Yöntem</td><td>Kural tabanlı kesme</td><td>Sözlük + morfolojik analiz</td></tr>
+    <tr><td>Hız</td><td class="hl-g">Hızlı</td><td>Yavaş</td></tr>
+    <tr><td>Doğruluk</td><td>Düşük, hatalı kök üretebilir</td><td class="hl-g">Yüksek, gerçek sözlük formu</td></tr>
+    <tr><td>Ne zaman?</td><td>Hız kritikse, büyük veri</td><td>Duygu analizi, chatbot, özetleme</td></tr>
+  </table>
+  <div class="example"><strong>Örnek — Stemming hata yapabilir</strong>"koşuyordu" → "koşuyor" (geçersiz kök olabilir)</div>
+  <div class="example"><strong>Örnek — Lemmatization doğru</strong>"koşuyordu" → "koşmak" (sözlük formu)</div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── BAG OF WORDS ─── -->
+<section class="section" id="bow">
+  <div class="section-header">
+    <span class="section-tag tag-blue">03</span>
+    <h2 class="section-title">Bag of Words (BoW)</h2>
+  </div>
+  <div class="card">
+    <p>Metindeki kelimelerin kaç kez geçtiğini sayarak vektör oluşturur. <span class="hl">Kelime sırası ve anlam yoktur.</span></p>
+  </div>
+  <div class="example"><strong>Örnek</strong>
+Doc1: "Kedi süt içer" → kedi:1, süt:1, içer:1, köpek:0
+Doc2: "Köpek süt içer köpek" → kedi:0, süt:1, içer:1, köpek:2</div>
+
+  <div class="card">
+    <div class="card-title">CountVectorizer Parametreleri</div>
+    <ul class="dot-list">
+      <li><span class="hl-b">min_df=5</span> → en az 5 belgede geçmeyen kelimeler çıkar (nadir/gürültülü)</li>
+      <li><span class="hl-b">max_df=0.8</span> → belgelerin %80'inden fazlasında geçen kelimeler çıkar (çok yaygın)</li>
+      <li><span class="hl-b">max_features=5000</span> → yalnızca en sık 5000 kelime seçilir</li>
+    </ul>
+  </div>
+  <div class="example"><strong>100.000 kelimeli koleksiyonda BoW vektör boyutu?</strong>100.000 boyutlu seyrek (sparse) vektör — çoğu değer sıfır</div>
+</section>
+
+<!-- ─── TF-IDF ─── -->
+<section class="section" id="tfidf">
+  <div class="section-header">
+    <span class="section-tag tag-blue">04</span>
+    <h2 class="section-title">TF-IDF</h2>
+  </div>
+
+  <div class="formula">
+    <div class="flabel">TF — Term Frequency</div>
+    TF(t, d) = kelimenin d belgesindeki frekansı / d belgesindeki toplam kelime sayısı
+  </div>
+  <div class="example"><strong>Örnek</strong>Belgede 20 kelime var, "güzel" 4 kez geçiyor → TF = 4/20 = <span class="hl">0.2</span></div>
+
+  <div class="formula">
+    <div class="flabel">IDF — Inverse Document Frequency</div>
+    IDF(t) = log( N / df(t) )
+    <br><br>
+    N = toplam belge sayısı
+    df(t) = "t" kelimesinin geçtiği belge sayısı
+  </div>
+  <div class="example"><strong>Neden log?</strong>Çok nadir kelimelerin astronomik değer almasını önler, değerleri dengeli ölçeğe çeker.</div>
+  <div class="example"><strong>Neden +1 (smoothing)?</strong>IDF(t) = log(N / (df+1)) → df=0 olursa sıfıra bölme hatasını önler.</div>
+  <div class="example"><strong>Örnek</strong>N=100, "yapay" 10 belgede geçiyor → IDF = log(100/10) = log(10) = <span class="hl">1</span></div>
+  <div class="example"><strong>"Ve" gibi stop-word IDF'si?</strong>N=100 belgede 100'ünde geçiyor → IDF = log(100/100) = log(1) = <span class="hl">0</span> → TF-IDF = 0 → etkisiz!</div>
+
+  <div class="formula">
+    <div class="flabel">TF-IDF</div>
+    TF-IDF(t, d) = TF(t, d) × IDF(t)
+  </div>
+  <div class="example"><strong>Örnek</strong>TF=0.05, IDF=2 → TF-IDF = 0.05 × 2 = <span class="hl">0.1</span></div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── EMBEDDING ─── -->
+<section class="section" id="embedding">
+  <div class="section-header">
+    <span class="section-tag tag-purple">05</span>
+    <h2 class="section-title">Metin Sayısallaştırma: Genel Tablo</h2>
+  </div>
+  <table class="cmp-table">
+    <tr><th>Yöntem</th><th>Anlam?</th><th>Bağlam?</th><th>Vektör tipi</th></tr>
+    <tr><td>Bag of Words</td><td>❌</td><td>❌</td><td>Seyrek (sparse)</td></tr>
+    <tr><td>TF-IDF</td><td>❌</td><td>❌</td><td>Seyrek</td></tr>
+    <tr><td>Word2Vec / GloVe / FastText</td><td>✅</td><td>Kısmi</td><td>Yoğun (dense)</td></tr>
+    <tr><td>BERT (Transformer)</td><td>✅</td><td>✅ Tam bağlam</td><td>Yoğun, dinamik</td></tr>
+  </table>
+</section>
+
+<!-- ─── WORD2VEC ─── -->
+<section class="section" id="word2vec">
+  <div class="section-header">
+    <span class="section-tag tag-purple">06</span>
+    <h2 class="section-title">Word2Vec — CBOW & Skip-Gram</h2>
+  </div>
+
+  <div class="card">
+    <p>Belgeler kelimelere bölünür. Model "hedef kelimenin çevresinde hangi kelimeler var?" sorusunu öğrenir. Vektörler rastgele başlar, her iterasyonda gradyanla güncellenir.</p>
+    <p style="margin-top:8px">Eğitim sonunda: <span class="hl-g">benzer anlamlı kelimeler vektör uzayında yakın, uzak kelimeler farklı pozisyonda</span></p>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">CBOW</div>
+      <p>Bağlam kelimeleri → hedef kelime tahmini</p>
+      <div class="example"><strong>Mantık</strong>"Etraftaki kelimeleri ver, ortadakini tahmin et." Bağlam kelimelerinin ortalaması alınır.</div>
+      <div class="example"><strong>Giriş / Çıkış</strong>Giriş: [kedi, içer] → Çıkış: süt</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Skip-Gram</div>
+      <p>Hedef kelime → bağlam kelimeleri tahmini</p>
+      <div class="example"><strong>Mantık</strong>"Ortadaki kelimeyi ver, etraftakileri ayrı ayrı tahmin et."</div>
+      <div class="example"><strong>Giriş / Çıkış</strong>Giriş: süt → Çıkış: [kedi, içer]</div>
+    </div>
+  </div>
+
+  <div class="formula">
+    <div class="flabel">CBOW Güncelleme Formülü</div>
+    V_hedef_yeni = V_hedef + η × (V_bağlam_ort − P_hedef)
+  </div>
+  <div class="formula">
+    <div class="flabel">Skip-Gram Güncelleme Formülü</div>
+    V_hedef_yeni = V_hedef + η × (V_bağlam − P_hedef)
+  </div>
+  <div class="example"><strong>η (eta) nedir?</strong>Öğrenme hızı (learning rate). Örn. 0.1 — vektörün her adımda ne kadar değişeceğini belirler.</div>
+  <div class="example"><strong>Sayısal Örnek</strong>V_hedef = [0.5, 0.3], η = 0.1, hata = [0.2, 0.4]<br>V_yeni = [0.5 + 0.1×0.2 , 0.3 + 0.1×0.4] = <span class="hl">[0.52, 0.34]</span></div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Word2Vec'in Problemi</div>
+    <p>Her kelimeye <span class="hl">tek ve sabit</span> bir vektör atanır. "Bank" kelimesi finans veya nehir anlamında kullanılsa da aynı vektörü alır → çok anlamlı kelimelerde sorun.</p>
+  </div>
+</section>
+
+<!-- ─── GLOVE ─── -->
+<section class="section" id="glove">
+  <div class="section-header">
+    <span class="section-tag tag-purple">07</span>
+    <h2 class="section-title">GloVe (Global Vectors)</h2>
+  </div>
+  <div class="card">
+    <p>Kelime ilişkilerini <span class="hl-g">global istatistiklerden</span> (co-occurrence matrisi) öğrenir. Word2Vec yerel bağlama bakarken GloVe tüm koleksiyonu değerlendirir.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Co-occurrence Matrisi</div>
+    <p>Tüm koleksiyonda hangi kelimelerin hangi kelimelerle birlikte kaç kez geçtiğini gösterir.</p>
+    <div class="example"><strong>Örnek</strong>"kedi–süt" 200 kez birlikte → güçlü ilişki<br>"kedi–taş" 5 kez birlikte → zayıf ilişki</div>
+  </div>
+  <div class="formula">
+    <div class="flabel">GloVe Kayıp Fonksiyonu (basit gösterim)</div>
+    J = Σ f(X_ij) × (w_i · w_j + b_i + b_j − log X_ij)²
+    <br><br>
+    X_ij = kelime i ile kelime j'nin birlikte geçme sayısı
+    f(X_ij) = ağırlık fonksiyonu (çok nadir çiftlere düşük ağırlık)
+  </div>
+  <div class="example"><strong>Notlarındaki gösterim</strong>y = w_hedef · w_bağlam + b_hedef + b_bağlam → minimize edilir<br>Güncelleme: w = w − η × (∂J/∂w)</div>
+</section>
+
+<!-- ─── FASTTEXT ─── -->
+<section class="section" id="fasttext">
+  <div class="section-header">
+    <span class="section-tag tag-purple">08</span>
+    <h2 class="section-title">FastText</h2>
+  </div>
+  <div class="card">
+    <p>Kelimeleri <span class="hl">karakter n-gramlarına (alt kelime parçalarına)</span> bölerek öğrenir. Sözlükte olmayan kelimeler için bile anlamlı vektör üretilebilir.</p>
+  </div>
+  <div class="example"><strong>Örnek — "kitap" için alt parçalar</strong>"kit" · "ita" · "tap" · "itap" → parçaların vektörleri toplanarak kelime vektörü oluşur</div>
+  <div class="example"><strong>Türkçe için neden kritik?</strong>"güzelleştiremediklerimizden" → eğitimde görülmemiş olsa bile alt parçalardan vektör türetilebilir</div>
+  <div class="card" style="margin-top:8px">
+    <div class="card-title">FastText Mantığını Bil, Sayısal Hesap Gerekmez</div>
+    <p>Hoca "FastText mantığını öğrenin yeter" demiş. <span class="hl-g">Subword/karakter n-gram mantığını ve Türkçe eklemeli dilde avantajını</span> bilmek yeterli.</p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── TRANSFORMER EMBEDDING ─── -->
+<section class="section" id="transformer">
+  <div class="section-header">
+    <span class="section-tag tag-pink">09</span>
+    <h2 class="section-title">Transformer Embedding & Attention</h2>
+  </div>
+
+  <div class="card">
+    <p>Aynı kelime için <span class="hl">farklı bağlamlarda farklı vektörler</span> üretilir. Bu Word2Vec'in tek vektör problemini çözer.</p>
+  </div>
+
+  <table class="cmp-table">
+    <tr><th></th><th>Word2Vec</th><th>BERT (Transformer)</th></tr>
+    <tr><td>"bank" vektörü</td><td>Her yerde aynı</td><td>Finans bağlamında farklı, nehir bağlamında farklı</td></tr>
+    <tr><td>Bağlam</td><td>Kısmi (pencere)</td><td>Tüm cümle</td></tr>
+    <tr><td>Yön</td><td>Tek yönlü</td><td>Çift yönlü</td></tr>
+  </table>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Attention Mekanizması — Q, K, V</div>
+    <ul class="dot-list">
+      <li><span class="hl-b">Q (Query)</span> — "Ben kimi arıyorum?"</li>
+      <li><span class="hl-b">K (Key)</span> — "Ben kimim?"</li>
+      <li><span class="hl-b">V (Value)</span> — "Benim taşıdığım bilgi ne?"</li>
+    </ul>
+  </div>
+
+  <div class="formula">
+    <div class="flabel">Attention Skoru (Dot Product)</div>
+    score(Q, K) = Q · K = Σ (Q_i × K_i)
+    <br><br>
+    Yüksek skor → o kelimeye daha çok dikkat et
+  </div>
+
+  <div class="example"><strong>Örnek — "I deposited money in the bank"</strong>Q_bank=[0.5,0.2], K_money=[0.6,0.1] → 0.5×0.6 + 0.2×0.1 = <span class="hl">0.32</span>
+Q_bank=[0.5,0.2], K_river=[0.1,0.7] → 0.5×0.1 + 0.2×0.7 = <span class="hl">0.19</span>
+0.32 > 0.19 → bank = finans kurumu</div>
+
+  <div class="example"><strong>"Ali kitabı Ahmet'e verdi çünkü o çalışkandı"</strong>"o" kim? → Attention, Ali ve Ahmet ile ilişkiye bakar → "çalışkandı" hangisiyle daha ilişkili ise "o" o kişidir</div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Model Mimarileri</div>
+    <table class="cmp-table">
+      <tr><th>Tip</th><th>Model</th><th>Firma</th><th>Amaç</th></tr>
+      <tr><td>Encoder</td><td>BERT, RoBERTa, DistilBERT, ALBERT, ELECTRA</td><td>Google vb.</td><td>Anlama, sınıflandırma, duygu analizi</td></tr>
+      <tr><td>Decoder</td><td>GPT</td><td>OpenAI</td><td>Metin üretme, chatbot</td></tr>
+      <tr><td>Enc-Dec</td><td>T5, Pegasus, BART</td><td>Google / Meta</td><td>Özetleme, çeviri, üretim</td></tr>
+    </table>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── ÖZET ÇIKARMA ─── -->
+<section class="section" id="ozet">
+  <div class="section-header">
+    <span class="section-tag tag-yellow">10</span>
+    <h2 class="section-title">Özet Çıkarma</h2>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Extractive (Çıkarımsal)</div>
+      <p>Metindeki önemli cümleler <span class="hl">aynen seçilir</span>. Yeni cümle üretilmez.</p>
+      <p style="margin-top:6px">✅ Güvenilir, bilgi üretmez<br>❌ Bazen akıcı değil</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Abstractive (Soyutlayıcı)</div>
+      <p>Metnin anlamı kavranır, <span class="hl">yeni cümleler üretilir</span>.</p>
+      <p style="margin-top:6px">✅ Doğal, akıcı<br>❌ Halüsinasyon riski</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Özetleme Süreci</div>
+    <ol class="step-list">
+      <li>Metnin ön işlenmesi (tokenizasyon, stop-word vb.)</li>
+      <li>Cümlelerin temsil edilmesi (TF-IDF, BERT embedding…)</li>
+      <li>Cümle önem skorunun hesaplanması (konum, başlık benzerliği, anahtar kelime…)</li>
+      <li>Cümle seçimi (yüksek skor + tekrar azaltma)</li>
+      <li>Özetin oluşturulması</li>
+    </ol>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── DUYGU ANALİZİ ─── -->
+<section class="section" id="duygu">
+  <div class="section-header">
+    <span class="section-tag tag-pink">11</span>
+    <h2 class="section-title">Duygu Analizi</h2>
+  </div>
+
+  <div class="card">
+    <p><span class="hl">Sentiment Analysis / Opinion Mining.</span> Metindeki görüş ve duyguları otomatik belirleme.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Duygu Analizi Türleri</div>
+    <table class="cmp-table">
+      <tr><th>Tür</th><th>Açıklama</th><th>Örnek</th></tr>
+      <tr><td>Kutupluluk</td><td>Olumlu / Olumsuz / Nötr</td><td>"Film harikaydı" → Olumlu</td></tr>
+      <tr><td>İkili</td><td>Yalnızca Olumlu / Olumsuz</td><td>Nötr sınıf yok</td></tr>
+      <tr><td>Üçlü</td><td>+/−/Nötr</td><td>"Telefon 128 GB" → Nötr</td></tr>
+      <tr><td>Çok Sınıflı</td><td>Çok olumlu…Çok olumsuz (5 sınıf)</td><td>Yıldız sistemi</td></tr>
+      <tr><td>Yoğunluk</td><td>Duygunun şiddeti</td><td>"Beğendim"(hafif) vs "Bayıldım"(güçlü)</td></tr>
+      <tr><td>Aspect-Based</td><td>Özellik bazlı duygu</td><td>"Kamera iyi ama batarya kötü"</td></tr>
+      <tr><td>Öznellik</td><td>Öznel mi nesnel mi?</td><td>"6.1 inç ekran" → Nesnel</td></tr>
+      <tr><td>Tutum</td><td>Destekliyor / Karşı / Tarafsız</td><td>Siyasi tutum analizi</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Duygu Analizi Yöntemleri</div>
+    <table class="cmp-table">
+      <tr><th>Yöntem</th><th>Nasıl?</th><th>Dezavantaj</th></tr>
+      <tr><td>Sözlük Tabanlı</td><td>Önceden puanlanmış kelime listesi</td><td>İroni, bağlamı anlayamaz</td></tr>
+      <tr><td>Makine Öğrenmesi</td><td>Naive Bayes, SVM, LR, RF…</td><td>Etiketli veri gerekir</td></tr>
+      <tr><td>Derin Öğrenme</td><td>CNN, RNN, LSTM, BiLSTM…</td><td>Veri yoğun</td></tr>
+      <tr><td>Transformer</td><td>BERT, RoBERTa, XLM-R…</td><td>Hesaplama maliyeti</td></tr>
+    </table>
+  </div>
+
+  <div class="example" style="margin-top:12px"><strong>İroni örneği — sözlük tabanlı neden başarısız?</strong>"Harika, yine kargo gecikti!" → "harika" olumlu puan alır ama gerçek anlam olumsuzdur</div>
+  <div class="example"><strong>"Ürün güzel değil." — LSTM neden önemli?</strong>"güzel" tek başına olumlu görünür; "değil" eki anlamı tersine çevirir. LSTM kelime sırasını öğrenir.</div>
+</section>
+
+<!-- ─── TÜRKÇE ZORLUKLAR ─── -->
+<section class="section" id="turkce">
+  <div class="section-header">
+    <span class="section-tag tag-pink">12</span>
+    <h2 class="section-title">Türkçe Duygu Analizinde Zorluklar</h2>
+  </div>
+  <div class="two-col">
+    <div class="card"><div class="card-title">Eklemeli Dil</div><p>"güzel" → "güzelleştiremediklerimizden" — sonsuz kelime varyantı</p></div>
+    <div class="card"><div class="card-title">Olumsuzluk Ekleri</div><p>"Beğendim" → Olumlu<br>"Beğenmedim" → Olumsuz<br>"-me/-ma" ekini model tanımalı</p></div>
+    <div class="card"><div class="card-title">İroni ve Alay</div><p>"Mükemmel hizmet, 2 saat bekledik!" → gerçekte olumsuz</p></div>
+    <div class="card"><div class="card-title">Emoji ve Kısaltmalar</div><p>"ürün efsaneee 🔥" → klasik yöntemler zorlanır</p></div>
+    <div class="card"><div class="card-title">Bağlam Problemi</div><p>"Film çok ağır" → olumsuz<br>"Dili ağır ama etkileyici" → olumlu<br>Aynı kelime farklı anlam</p></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── SPAM ─── -->
+<section class="section" id="spam">
+  <div class="section-header">
+    <span class="section-tag tag-orange">13</span>
+    <h2 class="section-title">Spam Tespiti</h2>
+  </div>
+
+  <div class="card">
+    <p>İki sınıflı metin sınıflandırma: <span class="hl">Spam</span> / <span class="hl-g">Ham (Normal)</span></p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Spam Mesaj Özellikleri</div>
+    <div class="tag-row">
+      <span class="tag-item">ücretsiz</span><span class="tag-item">kazandınız</span><span class="tag-item">hediye</span>
+      <span class="tag-item">hemen tıkla</span><span class="tag-item">son fırsat</span><span class="tag-item">şifrenizi doğrulayın</span>
+      <span class="tag-item">çok fazla ünlem !!!</span><span class="tag-item">büyük harf</span><span class="tag-item">şüpheli link</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Spam Tespiti Süreci</div>
+    <ol class="step-list">
+      <li>Veri toplama</li>
+      <li>Veri etiketleme (spam / ham)</li>
+      <li>Ön işleme (küçük harf, URL temizleme, emoji temizleme…)</li>
+      <li>Özellik çıkarımı</li>
+      <li>Model eğitimi</li>
+      <li>Model testi</li>
+      <li>Yeni mesajların sınıflandırılması</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Kullanılan Özellikler</div>
+    <table class="cmp-table">
+      <tr><th>Özellik</th><th>Açıklama</th></tr>
+      <tr><td>Kelime tabanlı</td><td>"ücretsiz", "kazandınız", "indirim" gibi spam kelimeleri</td></tr>
+      <tr><td>N-gram</td><td>"ödül kazandınız", "hemen tıklayın" gibi kalıplar</td></tr>
+      <tr><td>TF-IDF</td><td>Ayırt edici kelimelere ağırlık</td></tr>
+      <tr><td>Yapısal</td><td>Mesaj uzunluğu, büyük harf oranı, link sayısı, para birimi</td></tr>
+      <tr><td>Gönderen</td><td>Domain güvenilirliği, gönderim sıklığı</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Spam Tespit Yöntemleri</div>
+    <table class="cmp-table">
+      <tr><th>Yöntem</th><th>Açıklama / Avantaj</th><th>Dezavantaj</th></tr>
+      <tr><td>Kural Tabanlı</td><td>"kazandınız" + link → spam</td><td>Bağlamı anlamaz, çok kural gerekir</td></tr>
+      <tr><td>Sözlük Tabanlı</td><td>Spam kelimelerine puan ver, eşik geç → spam</td><td>Yeni spam türlerine karşı zayıf</td></tr>
+      <tr><td>Makine Öğrenmesi</td><td><span class="hl-g">Naive Bayes</span> — kelime olasılıklarıyla spam ihtimali hesaplar</td><td>Etiketli veri gerekir</td></tr>
+      <tr><td>Derin Öğrenme</td><td>LSTM kelime sırasını öğrenir. "Bu kampanya gerçek değil" → uyarı, spam değil</td><td>Veri yoğun</td></tr>
+      <tr><td>Transformer</td><td>BERT bağlamı anlar; uyarı amaçlı mesajları spam saymaz</td><td>Hesaplama maliyeti</td></tr>
+    </table>
+  </div>
+
+  <div class="example"><strong>Sözlük tabanlı örnek hesaplama</strong>"Ücretsiz hediye kazandınız, hemen tıklayın."<br>ücretsiz=2 + kazandınız=3 + hemen tıklayın=4 → Toplam: <span class="hl">9</span><br>Eşik=5 → <span class="hl">SPAM</span></div>
+  <div class="example"><strong>Phishing nedir?</strong>"Hesabınız askıya alınacak, şifrenizi güncelleyin." → Kişisel bilgi çalmaya yönelik spam türü</div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── METİN SINIFLANDIRMA ─── -->
+<section class="section" id="sinif">
+  <div class="section-header">
+    <span class="section-tag tag-blue">14</span>
+    <h2 class="section-title">Metin Sınıflandırma (Text Classification)</h2>
+  </div>
+
+  <div class="card">
+    <p>Denetimli öğrenme: etiketli örneklerden model öğrenir, yeni metinlerin kategorisini tahmin eder.</p>
+    <div class="example"><strong>Örnek</strong>"Borsa bugün yükselişle kapandı." → <span class="hl">Ekonomi</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Sınıflandırma Türleri</div>
+    <table class="cmp-table">
+      <tr><th>Tür</th><th>Açıklama</th><th>Örnek</th></tr>
+      <tr><td>İkili</td><td>2 sınıf</td><td>Spam/Normal · Olumlu/Olumsuz</td></tr>
+      <tr><td>Çok Sınıflı</td><td>N sınıf, tek etiket</td><td>Spor/Ekonomi/Sağlık/Teknoloji</td></tr>
+      <tr><td>Çok Etiketli</td><td>Birden fazla etiket mümkün</td><td>"Yapay zekâ destekli sağlık uygulaması" → Teknoloji + Sağlık</td></tr>
+      <tr><td>Hiyerarşik</td><td>Ana + alt kategoriler</td><td>Spor → Futbol → Galatasaray</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Metin Sınıflandırmada Problemler</div>
+    <ul class="dot-list">
+      <li><span class="hl-b">Kategoriler birbirine benzer</span> — "Ekonomi" ve "Siyaset" örtüşebilir</li>
+      <li><span class="hl-b">Çok anlamlı kelimeler</span> — "Virüs" → teknoloji veya sağlık</li>
+      <li><span class="hl-b">Kısa metinler</span> — "Harika olmuş." hangi konu?</li>
+      <li><span class="hl-b">Veri dengesizliği</span> — az örneğe sahip kategori öğrenilmez</li>
+      <li><span class="hl-b">Yanlış etiketleme</span> — sağlık haberi ekonomi olarak etiketlenirse model yanlış öğrenir</li>
+      <li><span class="hl-b">Alan bağımlılığı</span> — haber verisinde eğitilen model sosyal medyada başarısız olabilir</li>
+    </ul>
+  </div>
+
+  <div class="example"><strong>"Takım ekonomik kriz nedeniyle transfer yapamadı."</strong>"Takım" + "transfer" → Spor sinyali<br>"Ekonomik kriz" → Ekonomi sinyali<br>Transformer bu bağlamı bütünüyle değerlendirir.</div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── İNTİHAL ─── -->
+<section class="section" id="intihal">
+  <div class="section-header">
+    <span class="section-tag tag-green">15</span>
+    <h2 class="section-title">İntihal Tespiti</h2>
+  </div>
+
+  <div class="card">
+    <p>Bir metnin başka metinlerle <span class="hl">benzerlik gösterip göstermediğini</span> otomatik belirleme.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">İntihal Türleri</div>
+    <table class="cmp-table">
+      <tr><th>Tür</th><th>Açıklama</th></tr>
+      <tr><td>Doğrudan Kopyalama</td><td>Metin aynen alınmış</td></tr>
+      <tr><td>Kısmi Kopyalama</td><td>Bazı kelimeler değiştirilmiş</td></tr>
+      <tr><td>Parafraz</td><td>Farklı kelimeler, aynı anlam — en zor tespit</td></tr>
+      <tr><td>Çeviri</td><td>Başka dilden çevrilmiş — kelime eşleşmesi çalışmaz</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">İntihal Tespiti Süreci</div>
+    <ol class="step-list">
+      <li>Kontrol edilecek metin alınır</li>
+      <li>Karşılaştırılacak kaynaklar belirlenir</li>
+      <li>Metinler ön işleme tabi tutulur</li>
+      <li>Metinler parçalara ayrılır (cümle, paragraf, n-gram)</li>
+      <li>Parçalar sayısal veya yapısal olarak temsil edilir</li>
+      <li>Benzerlik hesaplanır</li>
+      <li>Benzerlik oranı ve benzer bölümler raporlanır</li>
+      <li>Uzman kişi sonucu yorumlar</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Yöntemler</div>
+    <table class="cmp-table">
+      <tr><th>Yöntem</th><th>Açıklama</th><th>Sınırlılık</th></tr>
+      <tr><td>Tam Eşleşme</td><td>Birebir kopyayı bulur</td><td>Kelime değişince çalışmaz</td></tr>
+      <tr><td>N-gram</td><td>Ardışık kelime grupları karşılaştırılır</td><td>Parafrazda başarısı düşer</td></tr>
+      <tr><td>Parmak İzi</td><td>Metinden ayırt edici parçalar seçilir</td><td>Büyük koleksiyonlar için hızlı</td></tr>
+      <tr><td>TF-IDF + Kosinüs</td><td>Metinler vektöre dönüştürülür, açı hesaplanır</td><td>Anlam değil kelime benzerliği</td></tr>
+      <tr><td>Anlamsal (BERT)</td><td>Anlam benzerliği ölçülür</td><td>Parafraz ve çeviride etkili</td></tr>
+      <tr><td>Kod İntihali (MOSS)</td><td>Değişken adı + yapısal benzerlik</td><td>Sadece metne bakılmaz</td></tr>
+    </table>
+  </div>
+
+  <div class="formula">
+    <div class="flabel">Jaccard Benzerliği</div>
+    Jaccard(A, B) = |A ∩ B| / |A ∪ B|
+    <br><br>
+    Ortak kelimeler / Tüm farklı kelimeler
+  </div>
+  <div class="example"><strong>Örnek</strong>A = {kedi, süt, içer} B = {kedi, köpek, içer}<br>Ortak: {kedi, içer} = 2<br>Birleşim: {kedi, süt, içer, köpek} = 4<br>Jaccard = 2/4 = <span class="hl">0.5</span></div>
+
+  <div class="formula">
+    <div class="flabel">Kosinüs Benzerliği</div>
+    cos(θ) = (A · B) / (|A| × |B|)
+    <br><br>
+    0 = hiç benzer değil  |  1 = aynı
+    Açı ne kadar küçükse metinler o kadar benzer
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">⚠️ Önemli: Yüksek Benzerlik = İntihal Değil</div>
+    <p>Kaynakça, teknik terimler, kanun maddeleri, doğrudan alıntılar benzerlik oranını artırabilir. <span class="hl">Son karar uzman tarafından verilmelidir.</span></p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">İntihal Tespit Araçları</div>
+    <div class="tag-row">
+      <span class="tag-item">Turnitin</span><span class="tag-item">iThenticate</span><span class="tag-item">Grammarly</span>
+      <span class="tag-item">PlagScan</span><span class="tag-item">Copyscape</span><span class="tag-item">Quetext</span>
+      <span class="tag-item">Unicheck</span><span class="tag-item">MOSS (kod)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">İntihal Tespitinin Zorlukları</div>
+    <ul class="dot-list">
+      <li><span class="hl-b">Parafraz</span> — kelimeler farklı, anlam aynı → anlamsal yöntem gerekir</li>
+      <li><span class="hl-b">Eş anlamlı kelimeler</span> — "öğrenci/talebe", "yöntem/metot"</li>
+      <li><span class="hl-b">Çeviri</span> — farklı dil → kelime eşleşmesi sıfır</li>
+      <li><span class="hl-b">Alan terimleri</span> — tıp/hukuk metinlerinde tekrar kaçınılmaz</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+</div>
+
+<button class="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+function scrollTo(id){
+  const el=document.getElementById(id);
+  if(el)el.scrollIntoView({behavior:'smooth'});
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  event.target.classList.add('active');
+}
+// highlight active section on scroll
+const sections=document.querySelectorAll('.section');
+const navItems=document.querySelectorAll('.nav-item');
+window.addEventListener('scroll',()=>{
+  let current='';
+  sections.forEach(s=>{
+    if(window.scrollY>=s.offsetTop-80)current=s.id;
+  });
+  navItems.forEach(n=>{
+    n.classList.remove('active');
+    if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+current+"'"))n.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
