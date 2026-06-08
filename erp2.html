@@ -1,465 +1,789 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDLC ve Test Otomasyonu Final Sınavı Hazırlık Havuzu (Hedef 100)</title>
-    <style>
-        :root {
-            --primary-color: #0056b3;
-            --bg-color: #f4f7f6;
-            --card-bg: #ffffff;
-            --text-color: #333333;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --border-radius: 8px;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            padding: 30px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        h1 { margin: 0; font-size: 24px; }
-        .subtitle { margin-top: 10px; font-opacity: 0.9; }
-        .quiz-card {
-            background-color: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border-left: 5px solid var(--primary-color);
-        }
-        .question-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-        .options-list {
-            list-style: none;
-            padding: 0;
-        }
-        .option-item {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            padding: 12px 15px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .option-item:hover {
-            background-color: #e9ecef;
-            border-color: #adb5bd;
-        }
-        .option-item.correct {
-            background-color: #d4edda !important;
-            border-color: #c3e6cb !important;
-            color: #155724;
-            font-weight: bold;
-        }
-        .option-item.incorrect {
-            background-color: #f8d7da !important;
-            border-color: #f5c6cb !important;
-            color: #721c24;
-        }
-        .rationale {
-            margin-top: 15px;
-            padding: 15px;
-            background-color: #e2e3e5;
-            border-radius: 5px;
-            display: none;
-            font-size: 14px;
-            border-left: 3px solid #6c757d;
-        }
-        .disabled {
-            pointer-events: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Final Sınavı Hazırlık Havuzu (SDLC & Test Otomasyon)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #1a202c; }
+
+  /* Ortak Dinamik Header ve Renk Değişimleri */
+  header {
+    padding: 28px 20px;
+    text-align: center;
+    color: white;
+    transition: background 0.3s ease;
+  }
+  header.mode-selection { background: linear-gradient(135deg, #2d3748, #4a5568); }
+  header.mode-sdlc { background: linear-gradient(135deg, #1a4e8a, #2d9cdb); }
+  header.mode-automation { background: linear-gradient(135deg, #0f3460, #16697a); }
+
+  header h1 { font-size: 1.8rem; margin-bottom: 6px; }
+  header p { opacity: 0.85; font-size: 0.95rem; }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 16px; }
+
+  /* Seçim Ekranı Tasarımı */
+  .selection-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+  .selection-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .selection-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  }
+  .selection-card.sdlc-btn { border-top: 6px solid #2d9cdb; }
+  .selection-card.automation-btn { border-top: 6px solid #16697a; }
+  .selection-card h2 { font-size: 1.4rem; margin-bottom: 10px; color: #2d3748; }
+  .selection-card p { color: #718096; font-size: 0.95rem; }
+
+  /* Sınav Alanı (Varsayılan olarak gizli) */
+  .quiz-area-wrap { display: none; }
+
+  .progress-bar-wrap { background: #cbd5e0; height: 8px; border-radius: 4px; margin: 20px auto; max-width: 700px; }
+  .progress-bar { height: 8px; border-radius: 4px; transition: width 0.4s; }
+  .progress-sdlc { background: linear-gradient(90deg, #2d9cdb, #38b2ac); }
+  .progress-automation { background: linear-gradient(90deg, #16697a, #48cae4); }
+
+  .score-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    background: white; border-radius: 12px; padding: 12px 20px;
+    margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    font-size: 0.9rem; color: #4a5568;
+  }
+  .score-bar span strong.sdlc-text { color: #2d9cdb; font-size: 1.1rem; }
+  .score-bar span strong.automation-text { color: #16697a; font-size: 1.1rem; }
+
+  .card {
+    background: white; border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    padding: 28px; margin-bottom: 16px;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  .question-number { font-size: 0.78rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+  .qn-sdlc { color: #2d9cdb; }
+  .qn-automation { color: #16697a; }
+
+  .question-text { font-size: 1.1rem; font-weight: 600; line-height: 1.5; color: #1a202c; margin-bottom: 20px; }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    background: #f7fafc; border: 2px solid #e2e8f0;
+    border-radius: 10px; padding: 13px 16px;
+    text-align: left; cursor: pointer; font-size: 0.97rem;
+    transition: all 0.2s; color: #2d3748;
+  }
+  .option-btn:hover:not(:disabled).btn-sdlc { border-color: #2d9cdb; background: #ebf8ff; }
+  .option-btn:hover:not(:disabled).btn-automation { border-color: #16697a; background: #e6f7f9; }
+  
+  .option-btn.correct { border-color: #48bb78; background: #f0fff4; color: #276749; font-weight: 600; }
+  .option-btn.wrong { border-color: #fc8181; background: #fff5f5; color: #9b2c2c; }
+  .option-btn.reveal { border-color: #48bb78; background: #f0fff4; color: #276749; }
+  .option-btn:disabled { cursor: default; }
+
+  .explanation {
+    display: none; margin-top: 16px;
+    background: #fffbeb; border-left: 4px solid #f6ad55;
+    border-radius: 8px; padding: 14px 16px;
+    font-size: 0.93rem; line-height: 1.6; color: #744210;
+  }
+  .explanation.show { display: block; animation: fadeIn 0.3s ease; }
+  .explanation strong { color: #c05621; }
+
+  .next-btn {
+    display: none; margin-top: 18px; width: 100%;
+    color: white; border: none; border-radius: 10px;
+    padding: 14px; font-size: 1rem; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .next-btn.nb-sdlc { background: linear-gradient(135deg, #2d9cdb, #1a4e8a); }
+  .next-btn.nb-automation { background: linear-gradient(135deg, #16697a, #0f3460); }
+  .next-btn:hover { opacity: 0.9; }
+  .next-btn.show { display: block; }
+
+  /* Sonuç Ekranı */
+  .result-screen {
+    display: none; text-align: center;
+    background: white; border-radius: 16px;
+    padding: 40px 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  .result-screen.show { display: block; animation: fadeIn 0.5s ease; }
+  .big-score { font-size: 4rem; font-weight: 800; }
+  .bs-sdlc { color: #2d9cdb; }
+  .bs-automation { color: #16697a; }
+  
+  .result-screen h2 { font-size: 1.5rem; margin: 10px 0 6px; color: #1a202c; }
+  .result-screen p { color: #718096; margin-bottom: 24px; }
+  
+  .restart-btn {
+    color: white; border: none; border-radius: 10px;
+    padding: 14px 32px; font-size: 1rem; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s;
+    margin: 5px;
+  }
+  .rb-sdlc { background: linear-gradient(135deg, #2d9cdb, #1a4e8a); }
+  .rb-automation { background: linear-gradient(135deg, #16697a, #0f3460); }
+  .restart-btn:hover { opacity: 0.9; }
+
+  /* Etiketler */
+  .tag { display: inline-block; font-size: 0.72rem; padding: 2px 8px; border-radius: 20px; font-weight: 600; margin-bottom: 8px; }
+  .tag-sdlc { background: #bee3f8; color: #2a69ac; }
+  .tag-automation { background: #b2f5ea; color: #234e52; }
+
+  code { background: #edf2f7; padding: 1px 5px; border-radius: 4px; font-family: monospace; font-size: 0.9em; color: #2d3748; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>SDLC ve Test Otomasyonu Final Sınavı Hazırlık Testi</h1>
-            <p class="subtitle">Ders Dokümanlarının Tamamını Kapsayan 30 Soruluk Öğretici Soru Bankası</p>
-        </header>
-        
-        <div id="quiz-container"></div>
+
+<header id="mainHeader" class="mode-selection">
+  <h1 id="headerTitle">📚 Sınav Hazırlık Merkezi</h1>
+  <p id="headerSubtitle">Turkcell ERP Systems · Çalışmak İstediğiniz Modülü Seçin</p>
+</header>
+
+<div class="container">
+  
+  <div class="selection-screen" id="selectionScreen">
+    <div class="selection-card sdlc-btn" onclick="startQuiz('sdlc')">
+      <h2>Yazılım Geliştirme Yaşam Döngüsü (SDLC)</h2>
+      <p>6 Temel Aşama, Geleneksel Modeller, Agile Dönüşüm ve Turkcell Süreçleri (30 Soru)</p>
+    </div>
+    <div class="selection-card automation-btn" onclick="startQuiz('automation')">
+      <h2>Test Otomasyonu ve Teknolojileri</h2>
+      <p>Test İlkeleri, RPA, XPath Konumlandırma, BDD ve Jenkins/SonarQube Metrikleri (25 Soru)</p>
+    </div>
+  </div>
+
+  <div class="quiz-area-wrap" id="quizAreaWrap">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progressBar" style="width:0%"></div>
     </div>
 
-    <script>
-        const quizData = [
-            {
-                number: 1,
-                question: "Modern bir SDLC (Yazılım Geliştirme Yaşam Döngüsü) projesini yönetirken aşağıdakilerden hangisi multidisinitipliner çalışma ortamında bir arada bulunması gereken temel roller arasında dokümanda açıkça belirtilmemiştir?",
-                options: [
-                    { text: "Veri Bilimci (Data Scientist)", correct: true, rationale: "Dokümanda (Sayfa 3) modern bir SDLC projesini yönetmek için bir araya gelmesi gereken roller arasında İş Analistleri, Geliştiriciler, Proje Yöneticileri ve Yazılım Test Uzmanları sayılmıştır; Veri Bilimci temel kadroda vurgulanmamıştır." },
-                    { text: "İş Analisti (Business Analyst)", correct: false, rationale: "İş analistleri, gereksinimlerin toplanması ve analiz sürecinde rol alan temel aktörlerdendir." },
-                    { text: "Yazılım Test Uzmanı (QA Tester)", correct: false, rationale: "Yazılım test uzmanları, ürünün hatasız olduğunu doğrulamak için döngünün vazgeçilmez bir parçasıdır." },
-                    { text: "Proje Yöneticisi (Project Manager)", correct: false, rationale: "Proje yöneticileri, kaynakların planlanması ve ekiplerin koordine edilmesinden sorumludur." }
-                ]
-            },
-            {
-                number: 2,
-                question: "SDLC'nin Planlama Aşaması ile ilgili olarak aşağıda verilen ifadelerden hangisi yanlıştır?",
-                options: [
-                    { text: "Bu aşamada yazılımın son kullanıcı arayüzleri, veritabanı tabloları ve sistem mimarisi detaylı olarak tasarlanır.", correct: true, rationale: "Arayüz tasarımı, veritabanları ve ağ gereksinimlerinin belirlenmesi planlama aşamasında değil, 'Tasarım Aşaması' (Sayfa 7) kapsamında gerçekleştirilir. Planlamanın amacı kapsam, maliyet ve zamanı belirlemektir." },
-                    { text: "Amacı sorunun kapsamını özetlemek ve olası çözüm yollarını belirlemektir.", correct: false, rationale: "Planlama aşamasının temel amaçlarından biri sorunun sınırlarını çizmek ve kaynak/maliyet hususlarını dikkate almaktır." },
-                    { text: "Kaynaklar, maliyetler, zaman ve diğer proje kısıtları bu aşamada dikkate alınır.", correct: false, rationale: "Fizibilite, bütçe, zaman çizelgesi ve kaynak atamaları tamamen planlama aşamasının sorumluluğundadır." },
-                    { text: "Projenin yapısını oluşturmak için gereken görevleri tanımlayan proje planı bu aşamada geliştirilir.", correct: false, rationale: "Proje planının geliştirilmesi, görevlerin tanımlanması ve önceliklendirilmesi planlama aşamasının ana çıktılarındandır." }
-                ]
-            },
-            {
-                number: 3,
-                question: "Turkcell içindeki SDLC süreç akışında, planlama ve talep yönetimi için kullanılan ana sistem ve bu sürecin başlangıç/onay adımı aşağıdakilerden hangisinde doğru olarak verilmiştir?",
-                options: [
-                    { text: "Süreç akışları Jira üzerinden yönetilir; planlama bir ICT teklifinin oluşturulmasıyla başlar ve onaylanan talepler ekibin 'backlog' listesine atanır.", correct: true, rationale: "Dokümanın 25. ve 26. sayfalarına göre süreçlerin yönetildiği ana sistem Jira'dır. Süreç ICT teklifiyle başlar ve onaylanan talepler planlamaya dahil edilmek üzere ekibin birikim listesine (backlog) aktarılır." },
-                    { text: "Süreç akışları Jenkins üzerinden yönetilir; planlama kod branch'lerinin birleştirilmesiyle başlar.", correct: false, rationale: "Jenkins süreç akış yönetimi için değil, otomatik kod devreye alımları (CI/CD) için deploy aşamasında kullanılır." },
-                    { text: "Süreç akışları Confluence üzerinden yönetilir; planlama doğrudan yazılım geliştiricinin lokal ortamında başlar.", correct: false, rationale: "Confluence bir dokümantasyon aracıdır ve süreç takibi burada yapılmaz." },
-                    { text: "Süreç akışları Deasy sistemiyle başlar; ilk adım kod güvenlik analizidir.", correct: false, rationale: "Deasy otomatik veritabanı devreye alımları için kullanılan bir araçtır ve planlama aşamasında değil, en son deploy aşamasında rol oynar." }
-                ]
-            },
-            {
-                number: 4,
-                question: "Turkcell'de 'Gereksinim Aşaması' ve 'Analiz & Tasarım Aşaması' yürütülürken Jira ve Confluence belgelerinde aşağıdakilerden hangisinin yer alması beklenmez?",
-                options: [
-                    { text: "Canlı ortama çıkış sonrası yapılan ve 'bebek bakıcılığı' (babysitting) olarak adlandırılan gözlem raporları.", correct: true, rationale: "Bebek bakıcılığı dönemi ve buna ait gözlemler (Sayfa 31), döngünün en son aşaması olan 'Devreye Alım ve Bakım Aşaması'na aittir; analiz ve tasarım belgelerinde bulunmaz." },
-                    { text: "Ana, alternatif ve hata akışlarıyla belirlenmiş kullanım durumları (use case).", correct: false, rationale: "Dokümanın 28. sayfasında analiz dokümanında kullanım durumlarının (use case) ana, alternatif ve hata akışlarıyla belirleneceği açıkça ifade edilmiştir." },
-                    { text: "Çözüm analizi, HLS (High Level Solution), ekran ve görsel analizler.", correct: false, rationale: "Çözüm analizi, yüksek seviyeli çözümler (HLS) ve arayüz/ekran analizleri standart bir analiz dokümanının (Sayfa 28) temel parçalarıdır." },
-                    { text: "Veri modeli etkisi analizi ve detay analizi bölümleri.", correct: false, rationale: "Yapılacak değişikliğin veritabanı tablolarına etkisini ölçen veri modeli analizi ve detay analizi, analiz aşamasının adımlarındandır." }
-                ]
-            },
-            {
-                number: 5,
-                question: "Geleneksel SDLC modellerinden biri olan Waterfall (Şelale) Modeli için aşağıda yapılan değerlendirmelerden hangisi doğrudur?",
-                options: [
-                    { text: "Doğrusal ve basittir; geliştirme ekiplerinin bir sonraki aşamaya geçmeden önce projenin mevcut aşamasını tamamen bitirmesini gerektirir.", correct: true, rationale: "Dokümanın 13. sayfasında belirtildiği gibi Waterfall modeli çizgiseldir ve bir aşama tamamen bitmeden (task done) bir sonrakine geçilmesine izin vermez. Bu yüzden esneklikten yoksundur." },
-                    { text: "Sürekli değişen müşteri gereksinimlerine en kolay uyum sağlayan ve iterasyon döngüsü en yüksek olan modeldir.", correct: false, rationale: "Müşteri gereksinimlerine kolay uyum sağlayan model Waterfall değil, Agile (Çevik) veya Iterative modeldir." },
-                    { text: "Geliştirme öncesi aşamada minimum planlama gerektirir, tüm planlama kodlama esnasında netleşir.", correct: false, rationale: "Waterfall modelinde planlama ve gereksinim analizi geliştirme başlamadan önce tamamen bitmiş olmak zorundadır." },
-                    { text: "Bilinmeyeni çok olan, riskli ve ilk defa denenecek deneysel projeler için en ideal yaklaşımdır.", correct: false, rationale: "Waterfall son derece öngörülebilir, daha önce defalarca yapılmış ve sürpriz ihtimali düşük projeler için en iyi şekilde kullanılır." }
-                ]
-            },
-            {
-                number: 6,
-                question: "V-Modeli (Verification ve Validation) ile ilgili olarak, şelale modelinin eksikliklerini kapatmak adına genel olarak ortaya koyduğu en temel fark nedir?",
-                options: [
-                    { text: "Potansiyel hataları ve kusurları erkenden yakalamak için her bir geliştirme/doğrulama aşamasına karşılık gelen paralel bir test aşaması dahil etmesi.", correct: true, rationale: "Dokümanın 15. sayfasındaki V-Model diyagramında görüldüğü üzere, sol taraftaki her doğrulama (Verification) adımına karşılık sağ tarafta bir onaylama (Validation/Test) adımı bulunur. Böylece hataların büyümesi engellenir." },
-                    { text: "Herhangi bir sıkı zaman çizelgesi veya disiplin gerektirmemesi, süreçlerin tamamen serbest bırakılması.", correct: false, rationale: "V-Model aksine oldukça katıdır, yüksek disiplin ve çok sıkı bir zaman çizelgesi takibi gerektirir." },
-                    { text: "Projeyi küçük bağımsız modüllere bölüp her modülü ayrı bir şelale projesi gibi tamamen bağımsız çalıştırması.", correct: false, rationale: "Projeyi bağımsız modüllere bölüp ardışık inşa eden model 'Incremental (Artımlı) Model'dir." },
-                    { text: "Geliştiricilerin para ve kaynaklarla doğrudan kodlamaya başlayıp çıktıyı belirsiz bırakması.", correct: false, rationale: "Belli bir prosedür takip etmeyen, çıktısı belirsiz ve deneysel olan bu yaklaşım 'Big Bang Modeli'ne aittir." }
-                ]
-            },
-            {
-                number: 7,
-                question: "Spiral (Sarmal) Model'in risk analizi içeren yapısı göz önüne alındığında, bu modelle ilgili en büyük risk (dezavantaj) aşağıdakilerden hangisidir?",
-                options: [
-                    { text: "Uzayıp giden bir proje için hiç bitmeyen bir sarmal yaratma riski.", correct: true, rationale: "Dokümanın 17. sayfasında belirtildiği üzere Spiral model büyük projeler için avantajlı olsa da, sürekli tekrarlayan döngüler nedeniyle ucu açık, hiç bitmeyen bir sarmala (never-ending spiral) dönüşme riski taşır." },
-                    { text: "Küçük ve deneysel projelerde aşırı bütçe fazlası vermesi.", correct: false, rationale: "Spiral model zaten küçük projelere uygun değildir, büyük ve karmaşık projeler için tercih edilir." },
-                    { text: "Modelin esneklikten tamamen yoksun olması ve müşteri geri bildirimlerini kabul edememesi.", correct: false, rationale: "Spiral model, yapısı gereği müşteri evrimini ve değerlendirmesini her döngüde barındırdığı için oldukça esnektir." },
-                    { text: "Her aşamada yoğun dokümantasyon gerektirmesi nedeniyle kod yazımına hiç geçilememesi.", correct: false, rationale: "Yoğun dokümantasyon geleneksel/şelale modellerin özelliğidir; Spiral modelde kodlama ve test aktif şekilde yapılır." }
-                ]
-            },
-            {
-                number: 8,
-                question: "Agile (Çevik) SDLC Modeli ile Geleneksel Modeller karşılaştırıldığında, başarı ölçümü ve dokümantasyon yaklaşımları açısından aralarındaki temel fark nedir?",
-                options: [
-                    { text: "Agile'da başarı 'teslim edilen çalışan yazılım' ile ölçülür ve az belge gerektirir; Geleneksel modellerde başarı 'orijinal plana uygunluk' ile ölçülür ve yoğun dokümantasyon gerekir.", correct: true, rationale: "Dokümanın 22. ve 23. sayfalarındaki karşılaştırma tablosuna göre Agile esnektir, çalışan yazılıma odaklanır ve minimum dokümantasyon ister; geleneksel yöntemler ise plana sadakati başarı sayar ve yoğun belge üretir." },
-                    { text: "Agile model yoğun dokümantasyon olmadan çalışamaz; Geleneksel modeller ise başarıyı sadece kodun hızıyla ölçer.", correct: false, rationale: "Agile çok fazla belge gerektirmez, çalışan yazılıma odaklanır." },
-                    { text: "Geleneksel modeller her aşamada müşteri değişikliğini memnuniyetle kabul ederken, Agile model değişikliklere tamamen kapalıdır.", correct: false, rationale: "Tam tersine, Agile model değişiklikleri her aşamada memnuniyetle kabul eder; geleneksel modellerde plan baştan yapıldığı için değişiklik zordur." },
-                    { text: "Agile modelde iterasyon sayısı sınırlıdır; Geleneksel modellerde ise sonsuz sayıda iterasyon döngüsü vardır.", correct: false, rationale: "Agile'da ürün için gerektiği kadar çok sayıda iterasyon döngüsü vardır; geleneksel modellerde ise iterasyon sayısı oldukça sınırlıdır." }
-                ]
-            },
-            {
-                number: 9,
-                question: "Turkcell'deki Çevik Dönüşüm kapsamında hayata geçirilen organizasyonel modelin adı nedir ve takımlardaki roller (PO, SM) nasıl belirlenmiştir?",
-                options: [
-                    { text: "Modelin adı ATÖM'dür (Agile Transformation Organizational Model); Ürün Sahipleri (PO) ve Scrum Master'lar (SM) oylamayla seçilmiştir.", correct: true, rationale: "Dokümanın 33. sayfasında açıkça belirtildiği üzere Turkcell'de ATÖM hayata geçirilmiş, Çevik Ofis rehberliğinde ekipler oluşturulmuş ve PO/SM rolleri oylamayla seçilmiştir." },
-                    { text: "Modelin adı Testroyer'dır; roller üst yönetim tarafından doğrudan atanmıştır.", correct: false, rationale: "Testroyer bir organizasyonel model değil, Turkcell'in test otomasyonunda kullandığı özel framework'tür." },
-                    { text: "Modelin adı Cluster Flow'dur; roller dış kaynaklı danışmanlar arasından kura ile belirlenmiştir.", correct: false, rationale: "Takımlar arası etkileşim için 'Agility Cluster' yapısı kurulmuştur ancak ana organizasyonel modelin adı ATÖM'dür." },
-                    { text: "Modelin adı Devops Matrix'tir; roller yazılım geliştiricilerin kıdem seviyesine göre otomatik dağıtılmıştır.", correct: false, rationale: "Devops dönüşümü araçsal destek sağlamıştır ancak modelin resmi adı ATÖM'dür ve roller oylamaya dayanır." }
-                ]
-            },
-            {
-                number: 10,
-                question: "Turkcell'de geliştirilen bir yazılımın test süreçleri yürütülürken, testlerin sırasıyla koşulduğu ortamlar ve bu ortamlarda testi koşan roller hangi seçenekte doğru eşleştirilmiştir?",
-                options: [
-                    { text: "1. Lokal (Geliştirici) -> 2. Test (Test Uzmanı) -> 3. Stable (Analist/Son Kullanıcı) -> 4. Preprod (Analist/Otomasyon)", correct: true, rationale: "Dokümanın 30. sayfasındaki akışa göre testler sırasıyla Lokal (Yazılım Geliştirici), Test ortamı (Test Uzmanı), Stable ortamı (İş Analisti, Son Kullanıcılar) ve Preprod ortamında (İş Analisti, Test Otomasyon) yürütülür." },
-                    { text: "1. Preprod (Geliştirici) -> 2. Stable (Test Uzmanı) -> 3. Test (Analist) -> 4. Lokal (Son Kullanıcı)", correct: false, rationale: "Lokal ortam yazılımcının kendi bilgisayarıdır ve test akışı lokalde başlar, preprod ortamında son bulur. Bu sıralama tamamen terstir." },
-                    { text: "1. Test (Analist) -> 2. Lokal (Otomasyon) -> 3. Preprod (Geliştirici) -> 4. Stable (Son Kullanıcı)", correct: false, rationale: "Yazılım geliştirici kodunu test ortamına atmadan önce ilk olarak kendi bilgisayarında (Lokal ortam) test etmelidir." },
-                    { text: "1. Stable (Son Kullanıcı) -> 2. Preprod (Analist) -> 3. Test (Geliştirici) -> 4. Lokal (Test Uzmanı)", correct: false, rationale: "Son kullanıcılar yazılımı ilk aşamada test etmezler; en son kararlı (Stable) hale geldiğinde kabul testleri için sürece dahil olurlar." }
-                ]
-            },
-            {
-                number: 11,
-                question: "Turkcell'de 'Devreye Alım (Deployment)' aşamasında veritabanı değişiklikleri ve kod devreye alımları için otomatik olarak kullanılan araç çifti aşağıdakilerden hangisidir?",
-                options: [
-                    { text: "Otomatik veritabanı devreye alımları için Deasy; otomatik kod devreye alımları için Jenkins kullanılır.", correct: true, rationale: "Dokümanın 31. sayfasında açıklandığı üzere, veritabanı otomasyonu için Deasy Dashboard/Release Set yapısı işletilirken, kod tarafındaki CI/CD pipeline süreçlerini Jenkins yönetmektedir." },
-                    { text: "Veritabanı için Bitbucket; kod devreye alımı için Jira kullanılır.", correct: false, rationale: "Bitbucket ana kod deposudur (repository); Jira ise süreç takip aracıdır." },
-                    { text: "Veritabanı için Confluence; kod devreye alımı için SonarQube kullanılır.", correct: false, rationale: "Confluence dokümantasyon sağlar; SonarQube ise statik kod analizi yaparak kod kalitesini ölçer." },
-                    { text: "Veritabanı için Testroyer; kod devreye alımı için Appium kullanılır.", correct: false, rationale: "Testroyer ve Appium devreye alım aracı değil, test otomasyon çerçeveleridir." }
-                ]
-            },
-            {
-                number: 12,
-                question: "Yazılım testinin temel ilkelerinde yer alan 'Fault', 'Error' ve 'Failure' kavramlarının tanımları hangi seçenekte doğru olarak verilmiştir?",
-                options: [
-                    { text: "Fault: Yazılımdaki kusur/arıza; Error: Kusurlara neden olan hatalı bölümler; Failure: Beklenen çıktıyı üretememe durumu.", correct: true, rationale: "İkinci dokümanın (Test Otomasyonu) 8. sayfasına göre Fault yazılımdaki fiziksel kusurdur (bug/arıza). Error bu kusurlara sebep olan hatalı durumlardır. Failure ise yazılım çalışırken ortaya çıkan başarısızlık/beklenen çıktıyı verememe durumudur." },
-                    { text: "Fault: Sistemin tamamen çökmesi; Error: Kodun derlenememesi; Failure: Müşterinin ürünü beğenmemesi.", correct: false, rationale: "Müşterinin ürünü beğenmemesi teknik bir arıza tanımı değildir. Kavramlar yazılım test literatüründeki spesifik tanımlara dayanır." },
-                    { text: "Fault: Kullanıcı hatası; Error: Bilgisayarın donanım arızası; Failure: İnternet bağlantısının kopması.", correct: false, rationale: "Bu kavramların üçü de doğrudan yazılımın kendi iç yapısındaki hata döngüsünü açıklar; dış donanımla ilgili değildir." },
-                    { text: "Fault: Test uzmanının bulduğu hata; Error: Yazılımcının kabul ettiği hata; Failure: Canlıda çıkan hata.", correct: false, rationale: "Hatanın kimin bulduğu veya nerede çıktığı bu kavramların temel akademik tanımlarını belirlemez." }
-                ]
-            },
-            {
-                number: 13,
-                question: "Beizer'ın Test Olgunluk Seviyeleri (Test Maturity Levels) dikkate alındığında, 'Test etmenin amacının spesifik bir şeyi kanıtlamak değil, yazılımı kullanmanın riskini azaltmak olduğunu' savunan seviye aşağıdakilerden hangisidir?",
-                options: [
-                    { text: "Level 3", correct: true, rationale: "Test Otomasyonu dokümanının 9. sayfasına göre: Level 1 doğruluğu göstermek, Level 2 yazılımın çalışmadığını göstermek, Level 3 ise riski azaltmak (reduce the risk of using the software) amacını taşır." },
-                    { text: "Level 0", correct: false, rationale: "Level 0'da test etmek ile debugging (hata ayıklama) arasında hiçbir fark görülmez; en ilkel seviyedir." },
-                    { text: "Level 1", correct: false, rationale: "Level 1'in amacı yazılımın doğru çalıştığını kanıtlamaya çalışmaktır." },
-                    { text: "Level 4", correct: false, rationale: "Level 4'te test etmek, bilgi teknolojileri profesyonellerinin daha kaliteli yazılım geliştirmesine yardımcı olan üst düzey bir zihinsel disiplindir." }
-                ]
-            },
-            {
-                number: 14,
-                question: "Web uygulamalarında test otomasyonu yaparken elementleri konumlandırmak için kullanılan XPath diliyle ilgili olarak aşağıdaki ifadelerden hangisi yanlıştır?",
-                options: [
-                    { text: "XPath ifadelerinde sadece eleman isimleri kullanılabilir; id, name gibi eleman nitelikleri kullanılarak arama yapılamaz.", correct: true, rationale: "Aksine, dokümanın 18. sayfasında gösterildiği gibi eleman özellikleri sıkça kullanılır. Örneğin //input[@id='username'] veya //input[@name='email'] geçerli ve güçlü XPath yazım şekilleridir." },
-                    { text: "XPath, XML ve HTML belgelerini bir ağaç yapısı (tree structure) olarak temsil eder.", correct: false, rationale: "Doğrudur, XPath dökümanı hiyerarşik bir ağaç yapısı olarak görür ve adımları bu ağaç üzerinde konumlandırır." },
-                    { text: "//div[2]/input[1] ifadesi, ilgili div öğesinin altındaki birinci input öğesini konumsal olarak tanımlar.", correct: false, rationale: "Doğrudur, köşeli parantez içindeki sayılar eleman konumunu (index/position) belirtmek için kullanılır." },
-                    { text: "Web sayfalarındaki butonları doğrudan bulmak için basitçe //button ifadesi kullanılabilir.", correct: false, rationale: "Doğrudur, dokümanın 19. sayfasındaki örneklerde sayfa üzerindeki tüm buton elementlerini yakalamak için //button verilebileceği belirtilmiştir." }
-                ]
-            },
-            {
-                number: 15,
-                question: "Aşağıdaki test framework'lerinden hangisi davranış odaklı test (BDD - Behavior Driven Development) süreçleri için kullanılan araçlar arasında dokümanda açıkça listelenmiştir?",
-                options: [
-                    { text: "Cucumber ve Gauge", correct: true, rationale: "Dokümanın 21. sayfasında Cucumber için 'davranış odaklı test (BDD) için kullanılan bir test çerçevesidir', Gauge için ise 'BDD için kullanılan başka bir test çerçevesidir' ifadesi yer almaktadır." },
-                    { text: "JUnit ve NUnit", correct: false, rationale: "JUnit (Java için) ve NUnit (C# için) BDD aracı değil, birim test (Unit Test) çerçeveleridir." },
-                    { text: "PHPUnit ve Python Unittest", correct: false, rationale: "PHPUnit ve Python Unittest ilgili dillerde birim testleri koşmak için kullanılan framework'lerdir." },
-                    { text: "Appium ve Selenium", correct: false, rationale: "Selenium web otomasyonu, Appium ise mobil uygulama test otomasyonu için kullanılan genel UI test araçlarıdır." }
-                ]
-            },
-            {
-                number: 16,
-                question: "İlk PDF dokümanının girişinde (İçindekiler bölümü) Turkcell'deki SDLC süreci tanımlanırken, sürecin tam olarak hangi olayla başlayıp hangi olayla bittiği vurgulanmıştır?",
-                options: [
-                    { text: "Jira talepleriyle başlayan ve devreye alımla biten süreç.", correct: true, rationale: "Dokümanın 2. sayfasındaki 'Turkcell'de SDLC' başlığının karşısında aynen 'Jira talepleriyle başlayan ve devreye alımla biten süreç' ifadesi yer almaktadır." },
-                    { text: "Kod yazımıyla başlayan ve SonarQube analiziyle biten süreç.", correct: false, rationale: "Kod yazımı sürecin ortasındaki geliştirme aşamasıdır; süreç Jira talebiyle çok daha önce başlar." },
-                    { text: "Fizibilite raporuyla başlayan ve sadece ilk testlerin tamamlanmasıyla biten süreç.", correct: false, rationale: "Fizibilite planlama aşamasındadır ancak süreç canlıya alma (devreye alım) ile tamamlanır." },
-                    { text: "Müşteri şikayetiyle başlayan ve kodun refactor edilmesiyle biten süreç.", correct: false, rationale: "Bu bakım aşamasındaki bir alt döngüdür, genel SDLC yaşam döngüsünün ana başlangıç ve bitiş tanımı değildir." }
-                ]
-            },
-            {
-                number: 17,
-                question: "Incremental (Artımlı) SDLC Modeli ile ilgili olarak aşağıda verilen çalışma prensiplerinden hangisi yanlıştır?",
-                options: [
-                    { text: "Gereksinimlerin en başta belirlenmesi mümkün değildir; her modülün gereksinimi bir önceki modül canlıya alındıktan sonra sıfırdan keşfedilir.", correct: true, rationale: "Artımlı modelde genel gereksinimler (Requirements) en başta toplanır ve ardından birden fazla bağımsız modüle bölünür. Her modül kendi içinde analiz, tasarım ve kodlamadan geçer (Sayfa 19)." },
-                    { text: "Zorunlu olarak bir dizi şelale (Waterfall) döngüsünden oluşur.", correct: false, rationale: "Dokümanın 19. sayfasında artımlı modelin ardışık veya paralel işleyen bir dizi şelale döngüsünden oluştuğu belirtilmiştir." },
-                    { text: "Modülün sonraki her sürümü, önceki sürüme yeni bir işlev (fonksiyon) ekler.", correct: false, rationale: "Artımlı modelin temel amacı, her yeni 'build' ile ürünü büyüterek üzerine yeni özellikler eklemektir." },
-                    { text: "Her modül kendi içinde gereksinim, tasarım, uygulama ve test aşamalarından geçer.", correct: false, rationale: "Model şemasında da görüldüğü üzere her bağımsız modül yapısı bu standart aşamaların tamamını ayrı ayrı yürütür." }
-                ]
-            },
-            {
-                number: 18,
-                question: "Big Bang (Büyük Patlama) SDLC Modeli deneysel ve küçük projeler için tercih edilse de kurumsal projelerde neden tercih edilmez? Dokümana göre bu modelin en belirgin özelliği nedir?",
-                options: [
-                    { text: "Belirli bir sıkı süreç veya prosedürü takip etmemesi ve çıktılarının belirsiz olması.", correct: true, rationale: "Dokümanın 18. sayfasında Big Bang modelinin sıkı bir süreç takip etmediği, geniş fikirler için kullanıldığı ve çıktılarının tamamen belirsiz (unclear) olduğu vurgulanmıştır. Bu yüzden kurumsal yapılara uygun değildir." },
-                    { text: "Çok yoğun dokümantasyon gerektirmesi nedeniyle zaman kaybına yol açması.", correct: false, rationale: "Big Bang modelinde prosedür ve süreç olmadığı için dokümantasyon neredeyse hiç yoktur." },
-                    { text: "Müşterinin sürece dahil olmasına hiçbir aşamada izin vermemesi.", correct: false, rationale: "Bu modelde bir süreç kuralı olmadığı için müşteri engeli gibi yapılandırılmış kurallar da bulunmaz." },
-                    { text: "Sadece Java diliyle geliştirilen projelere uygun bir teknik mimariye sahip olması.", correct: false, rationale: "Modelin herhangi bir dil veya teknik mimari kısıtlaması yoktur, tamamen yönetimsel bir kuralsızlık modelidir." }
-                ]
-            },
-            {
-                number: 19,
-                question: "Agile (Çevik) metodolojide sıklıkla dile getirilen ve dokümanda 'Teoriye göre, hızlı ve erken başarısız olursanız, küçük sorunları büyük sorunlara dönüşmeden çözebilirsiniz' şeklinde açıklanan yaklaşım aşağıdakilerden hangisidir?",
-                options: [
-                    { text: "Hızlı başarısızlık (Fail fast)", correct: true, rationale: "Dokümanın 20. sayfasında Çevik metodolojide 'hızlı başarısızlığın (fail fast) teşvik edildiği' ve bunun büyük sorunları önlemedeki mantığı açıkça ifade edilmiştir." },
-                    { text: "Sıfır hata yaklaşımı (Zero-defect approach)", correct: false, rationale: "Çevik yaklaşım hataları tamamen engellemeyi değil, hatalardan hızlıca öğrenip ürünü adapte etmeyi savunur." },
-                    { text: "Bebek bakıcılığı dönemi (Babysitting period)", correct: false, rationale: "Bebek bakıcılığı, hata yapmakla ilgili bir felsefe değil, canlıya çıkış sonrası yapılan gözlem aşamasıdır." },
-                    { text: "Doğrusal test yaklaşımı (Linear testing)", correct: false, rationale: "Doğrusal yaklaşım şelale modeline aittir, Çevik model yinelemeli ve döngüseldir." }
-                ]
-            },
-            {
-                number: 20,
-                question: "Turkcell'de Agile dönüşüm kapsamında kurulan takımların kendilerine en uygun yöntemi seçebildiği belirtilmiştir. Dokümanda en yaygın olanlar arasında aşağıdakilerden hangisi sayılmamıştır?",
-                options: [
-                    { text: "Aşırı Programlama (Extreme Programming - XP)", correct: true, rationale: "Dokümanın 33. sayfasında Turkcell'de en yaygın kullanılan yöntemler arasında Scrum, Kanban, Scrumban ve Extended Kanban sayılmıştır; Extreme Programming bunlar arasında listelenmemiştir." },
-                    { text: "Scrum", correct: false, rationale: "Scrum, Turkcell'de yaygın olarak benimsenen ve ritüelleri uygulanan temel yöntemlerden biridir." },
-                    { text: "Kanban", correct: false, rationale: "Kanban ve bunun türevleri olan hibrit modeller ekipler tarafından sıkça tercih edilmektedir." },
-                    { text: "Scrumban", correct: false, rationale: "Scrumban, Scrum ve Kanban'ın avantajlarını birleştiren ve dokümanda yaygın olduğu belirtilen yöntemlerdendir." }
-                ]
-            },
-            {
-                number: 21,
-                question: "Turkcell'de devreye alım sonrasında uygulanan 'bebek bakıcılığı' (babysitting) dönemiyle ilgili olarak dokümanda yer alan doğru bilgi aşağıdakilerden hangisi?",
-                options: [
-                    { text: "Kısa bir gözlem dönemidir ve bu süre projenin kapsamına göre değişiklik gösterebilir.", correct: true, rationale: "Dokümanın 31. sayfasında aynen 'Devreye alımın ardından bebek bakıcılığı adı verilen kısa bir gözlem dönemi başlar. Bu süre projenin kapsamına göre değişiklik gösterebilir' yazmaktadır." },
-                    { text: "Sabit olarak 15 gün süren ve test uzmanlarının kod yazdığı bir aşamadır.", correct: false, rationale: "Süre sabit değildir, projeye göre değişir; ayrıca bu aşamada kod yazılmaz, gözlem yapılır." },
-                    { text: "Sadece lokal ortamda, yazılım geliştiricinin kendi bilgisayarında yürüttüğü bir süreçtir.", correct: false, rationale: "Bebek bakıcılığı ürün canlıya (prod ortama) alındıktan sonra yapılan bir operasyonel gözlemdir." },
-                    { text: "Müşterinin projeyi tamamen reddetmesi durumunda başlayan kriz yönetimi sürecidir.", correct: false, rationale: "Kriz yönetimi değil, normal devreye alım sürecinin standart ve başarılı bir son adımıdır." }
-                ]
-            },
-            {
-                number: 22,
-                question: "Yazılım testinin önemi anlatılırken ikinci PDF dokümanında büyük zarara ya da can kaybına yol açan tarihi yazılım hataları örnek gösterilmiştir. Aşağıdakilerden hangisi bu örneklerden biri değildir?",
-                options: [
-                    { text: "Boeing 737 Max uçaklarındaki sensör veri işleme hatası", correct: true, rationale: "Dokümanda NASA'nın Mars inişi hatası (125 Milyon $), Ariane 5 roketi 64-bit/16-bit çevrim hatası (370 Milyon $) ve THERAC-25 Radyoterapi cihazı ölümcül kazası örnek verilmiştir; Boeing 737 Max dokümanda yer almaz." },
-                    { text: "NASA'nın 1999 Mars İnişi uydusundaki çevrim hatası", correct: false, rationale: "Dokümanın 4. sayfasında 125 milyon dolarlık kayba yol açan bir yazılım çevrim hatası olarak açıkça listelenmiştir." },
-                    { text: "Ariane 5 roketindeki 64-bit'ten 16-bit'e veri çevrim arızası", correct: false, rationale: "Dokümanın 5. sayfasında 370 milyon dolarlık büyük bir kayıp örneği olarak verilmiştir." },
-                    { text: "THERAC-25 Radyoterapi Makinesindeki 3 ölümle sonuçlanan kusur", correct: false, rationale: "Dokümanın 6. sayfasında medikal alandaki yazılım kalitesizliğinin ölümcül sonuçlarına örnek olarak gösterilmiştir." }
-                ]
-            },
-            {
-                number: 23,
-                question: "İkinci PDF'in 7. sayfasında yer alan 'Yeni Teknolojiler' başlığı altındaki bilgilere göre, aşağıdakilerden hangisi yeni programlama dilleri ve metotlarının hayatımıza getirdiği olumsuz durumlardan biri olarak belirtilmiştir?",
-                options: [
-                    { text: "Yarı statik web uygulamalarının bazı güvenlik açıklarını doğurması ve istemci/sunucu taraflı performans-güvenlik sorunları.", correct: true, rationale: "Dokümanın 7. sayfasında yeni metotların yeni hatalara vesile olduğu, yarı statik web uygulamalarının, sunucu ve istemci taraflı uygulamaların güvenlik ve performans sorunları doğurduğu açıkça belirtilmiştir." },
-                    { text: "Gelişmiş yazılım araçlarının kod yazım hızını yavaşlatması.", correct: false, rationale: "Dokümanda araçların hızı yavaşlattığına dair bir bilgi yoktur; aksine bazı hataları önleyebileceği söylenmiştir." },
-                    { text: "Veritabanı tablolarının otomatik silinmesine yol açan derleme hataları.", correct: false, rationale: "Veritabanlarının silinmesi gibi spesifik bir hata türünden dokümanın bu kısmında bahsedilmemiştir." },
-                    { text: "Yazılımcıların kod kalitesini tamamen göz ardı ederek test yapmayı bırakması.", correct: false, rationale: "Yeni teknolojiler yüzünden testin bırakıldığı değil, testin doğasının ve hata türlerinin değiştiği vurgulanmıştır." }
-                ]
-            },
-            {
-                number: 24,
-                question: "İkinci PDF dokümanının 8. sayfasında verilen Java kod örneği incelendiğinde; numZero fonksiyonunun dizi içerisindeki sıfırları (0) sayarken yaptığı 'Fault' (Kusur) tam olarak nedir?",
-                options: [
-                    { text: "Döngünün int i = 1 ile başlaması nedeniyle dizinin ilk elemanı olan 0. indeksteki değeri kontrol etmemesi (atlaması).", correct: true, rationale: "Kod bloğunda for (int i = 1; i < x.length; i++) yazmaktadır. Diziler 0. indeksten başladığı için, eğer dizinin ilk elemanı sıfır ise kod bunu sayamayacaktır (Örn: numZero([0, 7, 2]) çağrısı yanlış sonuç verecektir)." },
-                    { text: "Dizinin uzunluğunu yanlış hesaplayıp taşma (IndexOutOfBounds) hatası vermesi.", correct: false, rationale: "Döngü koşulu i < x.length şeklinde yazıldığı için dizi sınırları dışına taşmaz, yani taşma hatası yoktur." },
-                    { text: "count değişkeninin en başta 1 olarak başlatılması.", correct: false, rationale: "Kodda int count = 0; yazılılarak değişken doğru bir şekilde sıfırdan başlatılmıştır." },
-                    { text: "Eşitlik kontrolünde == yerine yanlışlıkla atama operatörü olan = kullanılması.", correct: false, rationale: "Koşul ifadesinde if (x[i] == 0) yazılarak mantıksal eşitlik operatörü doğru kullanılmıştır." }
-                ]
-            },
-            {
-                number: 25,
-                question: "Teknik, yönetsel ve organizasyonel engeller listelenirken aşağıdakilerden hangisi 'Teknik Uyumsuzluklar / Zorluklar' arasında açıkça sayılmıştır?",
-                options: [
-                    { text: "Farklı yazılım yığınları (.NET, Java, Python), database çeşitliliği (MSSQL, Oracle, PostgreSQL) ve versiyon kontrol araçları (Git, TFS, SVN).", correct: true, rationale: "Dokümanın 12. sayfasındaki 'Teknik Zorluklar / Teknik Uyumsuzluklar' kutusunda tam olarak bu farklı teknoloji ve veritabanı yığınları ile test ortamı uyumsuzlukları listelenmiştir." },
-                    { text: "Farklı takımların farklı proje önceliklerinin olması.", correct: false, rationale: "Bu durum teknik bir zorluk değil, 'Organizasyonel Zorluklar' başlığı altında yer alır." },
-                    { text: "Sistem sahiplerinin otomasyon süreçlerine destek vermemesi.", correct: false, rationale: "Bu durum 'Yönetsel Zorluklar' başlığı altında listelenmiştir." },
-                    { text: "Proje takvimlerinin çok sıkışık olması nedeniyle otomasyona zaman ayrılamaması.", correct: false, rationale: "Bu durum 'Kaynak & Proje Gerçekleri' kapsamında değerlendirilmiştir." }
-                ]
-            },
-            {
-                number: 26,
-                question: "Test Otomasyonu dokümanının 13, 15 ve 20. sayfalarında 'Turkcell'de Test Otomasyon' başlığı altında merkezde yer alan 3 ana teknolojik bileşen hangisidir?",
-                options: [
-                    { text: "Selenium - Testroyer - Java", correct: true, rationale: "Dokümanın ilgili sayfalarında Turkcell'in test otomasyon omurgasını simgeleyen üç isim büyük puntolarla üst üste yazılmıştır: Selenium, Testroyer ve Java." },
-                    { text: "Appium - Cucumber - C#", correct: false, rationale: "Appium ve Cucumber 21. sayfadaki genel çerçeveler listesinde yer alır ancak ana kapak mimarisinde bu üçlü vurgulanmamıştır." },
-                    { text: "Jenkins - Deasy - Bitbucket", correct: false, rationale: "Bunlar CI/CD ve kaynak kod yönetimi araçlarıdır, test otomasyonunun kalbindeki özel framework üçlüsü değillerdir." },
-                    { text: "XPath - SelectorsHub - Python", correct: false, rationale: "XPath element bulma dilidir; SelectorsHub ise buna yardımcı bir araçtır." }
-                ]
-            },
-            {
-                number: 27,
-                question: "RPA (Robotic Process Automation) teknolojisi ile ilgili olarak aşağıda verilen tanımlardan hangisi dokümana göre doğrudur?",
-                options: [
-                    { text: "Manuel olarak yapılan, tekrarlayan ve kural tabanlı işlemleri, kullanıcı arayüzlerini simüle ederek insan gibi otomatikleştiren teknolojidir.", correct: true, rationale: "Dokümanın 16. sayfasında RPA'nın bilgisayar yazılımı ve robotik cihazlar kullanarak kural tabanlı ve tekrarlayan işleri insan gibi etkileşime girerek otomatikleştirdiği belirtilmiştir." },
-                    { text: "Yapay zeka modellerinin kendi kendine sıfırdan kod yazmasını sağlayan bir derin öğrenme kütüphanesidir.", correct: false, rationale: "RPA sıfırdan kod yazan bir yapay zeka değil, önceden belirlenmiş kurallara göre arayüzü taklit eden bir otomasyon yazılımıdır." },
-                    { text: "Sadece sunucu odalarındaki fiziksel donanım ve kablolama robotlarını yöneten bir firmware'dir.", correct: false, rationale: "Fiziksel robotlar değil, bilgisayar üzerindeki yazılımsal robotik süreç otomasyonudur." },
-                    { text: "Yazılımdaki güvenlik açıklarını siber saldırganlardan önce bulup otomatik kapatan bir siber güvenlik aracıdır.", correct: false, rationale: "RPA genel iş süreçlerinin verimliliği, doğruluğu ve maliyet azaltımı için kullanılır." }
-                ]
-            },
-            {
-                number: 28,
-                question: "İkinci PDF'in 22. sayfasında yer alan 'Jenkins Pipeline - Main Script' kod bloğu incelendiğinde, kodun continuous integration (sürekli entegrasyon) aşamasında derleme (build) işlemini tetiklemek için kullandığı Microsoft derleme aracı ve proje uzantısı nedir?",
-                options: [
-                    { text: "MsBuild 15.0 ve .sln (CoreWorkCashFlow.sln)", correct: true, rationale: "Pipeline script'indeki 93. satırda açıkça MsBuild 15.0 aracı çağrılmakta ve parametre olarak CoreWorkCashFlow.sln çözüm (solution) dosyası verilmektedir." },
-                    { text: "Dotnet CLI ve .csproj (CoreWorkCashFlow.csproj)", correct: false, rationale: "Kod satırında dotnet CLI komutları değil, doğrudan eski nesil büyük projeler için kullanılan MsBuild syntax'ı yer almaktadır." },
-                    { text: "Maven ve .xml (pom.xml)", correct: false, rationale: "Maven Java projeleri içindir; buradaki proje ise nuget.exe kullanan ve MsBuild ile derlenen bir .NET projesidir." },
-                    { text: "Npm ve .json (package.json)", correct: false, rationale: "Npm Node.js projelerine aittir, Jenkins script'indeki komutlar tamamen .NET/C# ekosistemine aittir." }
-                ]
-            },
-            {
-                number: 29,
-                question: "Jenkins Pipeline Stage View ekran görüntüsü (Sayfa 23) incelendiğinde, kırmızı renkle gösterilen ve '23 min 54s' sürerek hata alan, dolayısıyla projenin deploy edilmesini engelleyen kritik aşama hangisidir?",
-                options: [
-                    { text: "Code Quality (Kod Kalitesi)", correct: true, rationale: "Görseldeki Stage View tablosunda kırmızı renkle taralı olan ve altında 'failed' yazan sütun başlığı 'Code Quality' aşamasıdır; tam olarak 23 dakika 54 saniye sürmüş ve hata vererek pipeline'ı kesmiştir." },
-                    { text: "code security (Kod Güvenliği)", correct: false, rationale: "Code security aşaması yeşil renklidir ve başarıyla tamamlanmıştır." },
-                    { text: "Integration Test (Entegrasyon Testi)", correct: false, rationale: "Integration Test aşaması da yeşil görünüp başarıyla geçilmiştir." },
-                    { text: "BlackDuck Scan (Lisans ve Açık Kaynak Taraması)", correct: false, rationale: "BlackDuck Scan aşaması, Code Quality aşaması hata verip pipeline'ı durdurduğu için hiç çalışamamış ve kırmızı blok halinde kalmıştır." }
-                ]
-            },
-            {
-                number: 30,
-                question: "Dokümanın sonundaki SonarQube statik kod analizi rapor ekranı (Sayfa 24) incelendiğinde, projenin güvenliği (Security) ve bakım yapılabilirliği (Maintainability) için verilen harf notu seviyeleri sırasıyla hangi seçenekte doğru olarak eşleştirilmiştir?",
-                options: [
-                    { text: "Security: D, Maintainability: A", correct: true, rationale: "Ekran görüntüsündeki metriklere göre; 'Security' başlığının altında büyük kırmızı bir D harfi yer alırken, 'Maintainability' başlığının altında ise yeşil bir A harfi notu (260d Debt borcu ile) yer almaktadır." },
-                    { text: "Security: A, Maintainability: F", correct: false, rationale: "Projede 1 adet Vulnerability ve 81 adet Security Hotspot olduğu için Security notu düşüktür (D seviyesindedir)." },
-                    { text: "Security: B, Maintainability: B", correct: false, rationale: "Harf notları raporda spesifik olarak D ve A olarak ölçülmüştür." },
-                    { text: "Security: E, Maintainability: C", correct: false, rationale: "Reliability notu C, Security Review notu E'dir; ancak Security ana notu D, Maintainability notu ise A'dır." }
-                ]
-            }
-        ];
+    <div class="score-bar">
+      <span>Soru <strong id="currentQ">1</strong> / <strong id="totalQ">0</strong></span>
+      <span>Puan: <strong id="scoreDisplay">0</strong></span>
+    </div>
 
-        const container = document.getElementById('quiz-container');
+    <div id="quizArea"></div>
+    
+    <div class="result-screen" id="resultScreen">
+      <div class="big-score" id="finalScore"></div>
+      <h2 id="resultTitle"></h2>
+      <p id="resultMsg"></p>
+      <button class="restart-btn" id="restartBtn" onclick="restart()">🔄 Yeniden Başlat</button>
+      <button class="restart-btn" style="background: #4a5568;" onclick="backToMenu()">🏠 Ana Menüye Dön</button>
+    </div>
+  </div>
 
-        quizData.forEach((q) => {
-            const card = document.createElement('div');
-            card.className = 'quiz-card';
+</div>
 
-            const title = document.createElement('div');
-            title.className = 'question-title';
-            title.innerText = `Soru ${q.number}: ${q.question}`;
-            card.appendChild(title);
+<script>
+// --- SORU HAVUZLARI ---
+const sdlcQuestions = [
+  {
+    tag: "SDLC'ye Giriş",
+    q: "SDLC'nin açılımı nedir?",
+    options: ["System Development Life Cycle", "Software Development Life Cycle", "Software Design and Launch Cycle", "System Design and Logic Cycle"],
+    answer: 1,
+    exp: "<strong>Software Development Life Cycle (Yazılım Geliştirme Yaşam Döngüsü)</strong> — yazılımın fikir aşamasından başlayıp bakım aşamasına kadar geçen tüm süreçleri kapsayan yapıdır."
+  },
+  {
+    tag: "SDLC'ye Giriş",
+    q: "SDLC projesinde aşağıdaki rollerden hangisi yer ALMAZ?",
+    options: ["İş Analisti", "Yazılım Test Uzmanı", "Muhasebeci", "Proje Yöneticisi"],
+    answer: 2,
+    exp: "SDLC'nin temel rolleri: <strong>İş Analistleri, Geliştiriciler, Proje Yöneticileri ve Yazılım Test Uzmanları</strong>. Muhasebeci yazılım geliştirme sürecinin temel rolü değildir."
+  },
+  {
+    tag: "SDLC'ye Giriş",
+    q: "SDLC kaç temel aşamadan oluşur?",
+    options: ["4", "5", "6", "8"],
+    answer: 2,
+    exp: "Sunum diyagramında gösterildiği gibi SDLC <strong>6 aşamadan</strong> oluşur: Planning, Requirements Capture, Design & Analysis, Implementation, Testing & Integration, Maintenance."
+  },
+  {
+    tag: "SDLC Aşamaları",
+    q: "SDLC'nin ilk aşaması olan Planlama Aşaması'nın temel amacı nedir?",
+    options: ["Kod yazmak", "Sorunun kapsamını özetlemek ve çözüm yollarını belirlemek", "Test senaryoları oluşturmak", "Veritabanı tasarlamak"],
+    answer: 1,
+    exp: "<strong>Planlama Aşaması'nda</strong> kaynaklar, maliyetler, zaman ve diğer hususlar değerlendirilir; görevleri ve kaynakları tanımlayan proje planı geliştirilir."
+  },
+  {
+    tag: "SDLC Aşamaları",
+    q: "Gereksinim Aşaması ne için kritik öneme sahiptir?",
+    options: ["Ürünün pazara çıkması", "Geliştirme ekibine ne yapmaları gerektiğini söylemesi", "Test ortamını kurmak", "Bakım sürecini başlatmak"],
+    answer: 1,
+    exp: "<strong>Gereksinim Aşaması</strong>, yazılımın temellerinin belirlendiği aşamadır. Bu olmadan geliştirme ekibi işini hiçbir şekilde yapamaz."
+  },
+  {
+    tag: "SDLC Aşamaları",
+    q: "Analiz Aşaması'nda geliştiriciler aşağıdakilerden hangisini YAPMAZ?",
+    options: ["Prototip sistem gereksinimlerini tanımlamak", "Son kullanıcı ihtiyaçlarını araştırmak", "Kodu production ortamına almak", "Mevcut prototiplere alternatifleri değerlendirmek"],
+    answer: 2,
+    exp: "<strong>Analiz Aşaması'nda</strong> yeni sistem için spesifik detaylar toplanır ve prototipler için ilk fikirler belirlenir. Production'a alma işlemi Devreye Alım Aşaması'na aittir."
+  },
+  {
+    tag: "SDLC Aşamaları",
+    q: "Tasarım Aşaması'nda ele alınan konular arasında hangisi YER ALMAZ?",
+    options: ["Kullanıcı arayüzleri", "Veritabanları", "Ağ gereksinimleri", "Hataların müşteriye raporlanması"],
+    answer: 3,
+    exp: "<strong>Tasarım Aşaması'nda</strong> kullanıcı arayüzleri, sistem arayüzleri, ağ gereksinimleri ve veritabanları ele alınır. Hata raporlama Test ve Bakım aşamalarının konusudur."
+  },
+  {
+    tag: "SDLC Aşamaları",
+    q: "Geliştirme Aşaması'nda ne yapılır?",
+    options: ["Proje planı hazırlanır", "Kod yazılır ve uygulama tasarım belgelerine göre oluşturulur", "Kullanıcı testleri yapılır", "Sistem bakıma alınır"],
+    answer: 1,
+    exp: "<strong>Geliştirme Aşaması</strong>, geliştiricilerin kodu yazdığı ve uygulamayı önceki tasarım belgelerine ve spesifikasyonlara göre oluşturduğu aşamadır."
+  },
+  {
+    tag: "SDLC Aşamaları",
+    q: "Test Aşaması'nda aşağıdakilerden hangisi yapılmaz?",
+    options: ["Güvenlik açıklarının kapatılması", "Performans sorunlarının giderilmesi", "Proje bütçesinin belirlenmesi", "Hataların düzeltilmesi"],
+    answer: 2,
+    exp: "<strong>Test Aşaması'nda</strong>: hata düzeltme, kullanıcı deneyimi iyileştirme, güvenlik açıklarını kapatma, performans sorunları giderme ve teknik mimariye uygunluk kontrol edilir. Bütçe Planlama Aşaması'na aittir."
+  },
+  {
+    tag: "SDLC Aşamaları",
+    q: "Devreye Alım ve Bakım Aşaması ne zaman başlar?",
+    options: ["Gereksinimler tamamlandığında", "Test aşaması bittiğinde", "Yazılım pazara ulaştığında", "Tasarım belgesi onaylandığında"],
+    answer: 2,
+    exp: "<strong>Yazılım pazara ulaştığında SDLC sona ermez.</strong> Geliştiriciler bakım moduna geçer; kullanıcı bildirimleri, güvenlik açıkları ve performans iyileştirmeleri bu aşamada ele alınır."
+  },
+  {
+    tag: "SDLC Aşamaları",
+    q: "Bakım Aşaması'nda yapılan çalışmalar arasında hangisi YER ALMAZ?",
+    options: ["Kullanıcıların bildirdiği hatalar", "Lansmandan önce yamalanamayan hatalar", "İlk proje gereksinimlerinin yazılması", "Güvenlik açıklarının giderilmesi"],
+    answer: 2,
+    exp: "İlk proje gereksinimleri <strong>Gereksinim Aşaması'na</strong> aittir. Bakım aşamasında kalan hatalar, kullanıcı bildirimleri, güvenlik ve performans çalışmaları yapılır."
+  },
+  {
+    tag: "SDLC Modelleri",
+    q: "Waterfall modeli için hangisi DOĞRUDUR?",
+    options: ["Çok esnektir ve değişikliklere açıktır", "Tüm SDLC metodolojilerinin en eskisidir", "Yinelemeli döngülerle çalışır", "Küçük deneysel projeler için idealdir"],
+    answer: 1,
+    exp: "<strong>Waterfall (Şelale) modeli</strong> tüm SDLC metodolojilerinin en eskisidir. Doğrusal ve basittir; bir aşama tamamlanmadan diğerine geçilmez."
+  },
+  {
+    tag: "SDLC Modelleri",
+    q: "Waterfall modeli hangi tür projeler için en uygundur?",
+    options: ["Sürekli değişen gereksinimlere sahip projeler", "Son derece öngörülebilir projeler", "Küçük deneysel projeler", "Büyük ve risk içeren projeler"],
+    answer: 1,
+    exp: "Waterfall doğası gereği sabit olduğundan, <strong>son derece öngörülebilir projeler</strong> için en iyi şekilde kullanılır. Değişikliğe kapalı yapısı nedeniyle dinamik projelerde sorun yaratabilir."
+  },
+  {
+    tag: "SDLC Modelleri",
+    q: "V-Shaped Model'de şelale modelinden farkı nedir?",
+    options: ["Her aşama paralel yürütülür", "Her geliştirme aşamasına bir test aşaması dahil edilir", "Yinelemeli döngüler kullanılır", "Dokümantasyon gerektirmez"],
+    answer: 1,
+    exp: "<strong>V-Shaped Model (Doğrulama ve Geçerleme Modeli)</strong>: potansiyel hataları yakalamak için her geliştirme aşamasına karşılık gelen bir test aşaması eklenerek şelalenin eksiklikleri giderilmeye çalışılır."
+  },
+  {
+    tag: "SDLC Modelleri",
+    q: "Iterative (Yinelemeli) Model için hangisi DOĞRUDUR?",
+    options: ["Her aşama yalnızca bir kez yürütülür", "Döngüsel bir modeldir ve her döngüde yazılım daha rafine hale gelir", "Çıktıları belirsizdir", "Küçük projeler için tasarlanmıştır"],
+    answer: 1,
+    exp: "<strong>Iterative Model</strong> döngüsel bir yapıya sahiptir. Her yeni aşama yazılımın daha gelişmiş bir versiyonunu üretir; işlevsel kusurların erken tespitine olanak tanır ve değişen müşteri ihtiyaçlarına uyum sağlayabilir."
+  },
+  {
+    tag: "SDLC Modelleri",
+    q: "Spiral Modeli hangi modelden ilham almıştır?",
+    options: ["Waterfall Model", "V-Shaped Model", "Iterative Model", "Big Bang Model"],
+    answer: 2,
+    exp: "<strong>Spiral Model</strong>, Yinelemeli (Iterative) modelin yaklaşımından ilham almıştır. Proje tamamlanana kadar 4 aşamadan (Plan, Risk Analizi, Mühendislik, Değerlendirme) tekrar tekrar geçer."
+  },
+  {
+    tag: "SDLC Modelleri",
+    q: "Spiral Modeli'nin dezavantajı nedir?",
+    options: ["Esneklik sağlamaz", "Her aşamanın ayrı proje planı yoktur", "Uzayıp giden projelerde hiç bitmeyen bir sarmal yaratma riski vardır", "Küçük projelere uygun değildir"],
+    answer: 2,
+    exp: "Spiral modelin temel riski: proje uzadıkça <strong>hiç bitmeyen bir sarmal</strong> oluşabilmesi. Büyük projeler için avantajlı olmakla birlikte bu risk göz ardı edilmemelidir."
+  },
+  {
+    tag: "SDLC Modelleri",
+    q: "Big Bang Modeli hangi tür projeler için uygundur?",
+    options: ["Büyük kurumsal projeler", "Kısa vadeli projeler", "Daha küçük ve deneysel projeler", "Katı zaman çizelgesi olan projeler"],
+    answer: 2,
+    exp: "<strong>Big Bang Modeli</strong> inanılmaz derecede esnektir, sıkı prosedür izlemez ve çıktıları belirsizdir. Bu nedenle <strong>küçük ve deneysel projeler</strong> için uygundur."
+  },
+  {
+    tag: "SDLC Modelleri",
+    q: "Incremental (Artımlı) Model'de gereksinimler nasıl ele alınır?",
+    options: ["Tek seferde tüm gereksinimler analiz edilir", "Gereksinimler birden fazla bağımsız modüle bölünür", "Gereksinimler hiç belgelenmez", "Gereksinimler yalnızca test aşamada tanımlanır"],
+    answer: 1,
+    exp: "<strong>Incremental Model</strong>: gereksinimler birden fazla bağımsız modüle bölünür. Her modül gereksinimleri, tasarım, uygulama ve test aşamalarından geçer; sonraki her sürüm öncekine işlev ekler."
+  },
+  {
+    tag: "SDLC Modelleri",
+    q: "Agile modelinde 'hızlı başarısızlık' (fail fast) ne anlama gelir?",
+    options: ["Proje bütçesini hızla tüketmek", "Hızlı ve erken başarısız olarak küçük sorunları büyümeden çözmek", "Test aşamasını atlamak", "Müşteri gereksinimlerini göz ardı etmek"],
+    answer: 1,
+    exp: "<strong>Agile metodolojide hızlı başarısızlık teşvik edilir</strong>: teoriye göre, hızlı ve erken başarısız olursanız, küçük sorunları büyük sorunlara dönüşmeden çözebilirsiniz."
+  },
+  {
+    tag: "SDLC Modelleri",
+    q: "Agile model teknik olarak ne olarak tanımlanmaktadır?",
+    options: ["Bir metodoloji", "Bir çerçeve (framework)", "Bir programlama paradigması", "Bir test yöntemi"],
+    answer: 1,
+    exp: "<strong>Agile</strong> günümüzde en yaygın kullanılan yaklaşımlardan biri olmakla birlikte, teknik olarak ayrı bir modelden çok <strong>bir çerçeve (framework)</strong> olarak tanımlanmaktadır."
+  },
+  {
+    tag: "SDLC Modelleri",
+    q: "Agile ile Waterfall karşılaştırmasında başarı nasıl ölçülür?",
+    options: ["Agile: orijinal plana uygunluk / Waterfall: teslim edilen yazılım", "Agile: teslim edilen çalışan yazılım / Waterfall: orijinal plana uygunluk", "İkisi de aynı şekilde ölçer", "İkisi de müşteri memnuniyetiyle ölçer"],
+    answer: 1,
+    exp: "Agile'da başarı <strong>teslim edilen çalışan yazılımla</strong>, Waterfall'da ise <strong>orijinal plana uygunlukla</strong> ölçülür. Bu temel felsefi farklılıktan kaynaklanır."
+  },
+  {
+    tag: "SDLC Modelleri",
+    q: "Agile modeli dokümantasyon konusunda Waterfall'dan nasıl ayrılır?",
+    options: ["Agile çok daha fazla belge gerektirir", "Agile çok fazla belge gerektirmez; Waterfall yoğun dokümantasyon ister", "İkisi de aynı miktarda belge gerektirir", "Waterfall hiç belge gerektirmez"],
+    answer: 1,
+    exp: "<strong>Agile</strong> çok fazla belge gerektirmez, hızlı teslimata odaklanır. <strong>Waterfall (Geleneksel SDLC)</strong> ise yoğun dokümantasyon gerektirir; her aşamanın ayrı belgesi vardır."
+  },
+  {
+    tag: "Turkcell'de SDLC",
+    q: "Turkcell'de süreç akışlarının yönetildiği ana sistem hangisidir?",
+    options: ["Confluence", "Jenkins", "Jira", "Deasy"],
+    answer: 2,
+    exp: "<strong>Jira</strong>, Turkcell'de süreç akışlarının yönetildiği ana sistemdir. Planlama aşamasında ICT teklifinin oluşturulmasıyla başlayan süreç Jira üzerinden yürütülür."
+  },
+  {
+    tag: "Turkcell'de SDLC",
+    q: "Turkcell'de onaylanan talepler nereye atanır?",
+    options: ["Doğrudan geliştirmeye başlanır", "İlgili ekibin backlog listesine atanır", "Test ortamına gönderilir", "Müşteriye bildirim yapılır"],
+    answer: 1,
+    exp: "Onaylanan talepler <strong>ilgili ekibin backlog (birikim listesi)</strong>'ine atanır ve planlamaya dahil edilir. Bu Jira üzerindeki Backlog ekranında görünür."
+  },
+  {
+    tag: "Turkcell'de SDLC",
+    q: "Turkcell'de Analiz & Tasarım aşamasında kullanım durumları (use case) nasıl belirlenir?",
+    options: ["Yalnızca ana akışla", "Ana, alternatif ve hata akışlarıyla", "Yalnızca hata akışlarıyla", "Müşteri geri bildirimleriyle"],
+    answer: 1,
+    exp: "Turkcell'de kullanım durumları (use case) <strong>ana akış, alternatif akış ve hata akışlarıyla</strong> birlikte belirlenir. Bu, analiz dokümanının önemli bir bölümünü oluşturur."
+  },
+  {
+    tag: "Turkcell'de SDLC",
+    q: "Turkcell geliştirme aşamasında ana kod deposu (repository) olarak ne kullanılır?",
+    options: ["SVN", "Bitbucket üzerinde GIT", "GitHub", "Azure DevOps"],
+    answer: 1,
+    exp: "<strong>GIT ana kod deposu</strong> olarak kullanılır ve Bitbucket arayüzü üzerinden yönetilir. Her geliştirmenin farklı bir branch'te tutulduğu bu yapıda birden fazla branch yönetilmektedir."
+  },
+  {
+    tag: "Turkcell'de SDLC",
+    q: "Turkcell'de test aşaması hangi sırayla yürütülür?",
+    options: ["Test → Lokal → Stable → Preprod", "Lokal → Test → Stable → Preprod", "Stable → Test → Lokal → Preprod", "Preprod → Stable → Test → Lokal"],
+    answer: 1,
+    exp: "Testler sırayla: <strong>1. Lokal (Geliştirici) → 2. Test ortamı (Test uzmanı) → 3. Stable (İş Analisti, Son Kullanıcılar) → 4. Preprod (İş Analisti, Test Otomasyonu)</strong> şeklinde yürütülür."
+  },
+  {
+    tag: "Turkcell'de SDLC",
+    q: "Turkcell'de otomatik veritabanı devreye alımları için hangi araç kullanılır?",
+    options: ["Jenkins", "Jira", "Deasy", "Confluence"],
+    answer: 2,
+    exp: "<strong>Deasy</strong> otomatik veritabanı devreye alımları için, <strong>Jenkins</strong> ise otomatik kod devreye alımları için kullanılır."
+  },
+  {
+    tag: "Turkcell'de SDLC",
+    q: "Turkcell'de devreye alımın ardından başlayan kısa gözlem döneminin adı nedir?",
+    options: ["Hotfix süreci", "Bebek bakıcılığı", "Monitoring Sprint", "Stabilizasyon dönemi"],
+    answer: 1,
+    exp: "Turkcell'de devreye alımın ardından <strong>'bebek bakıcılığı'</strong> adı verilen kısa bir gözlem dönemi başlar. Bu süre projenin kapsamına göre değişiklik gösterebilir."
+  },
+  {
+    tag: "Turkcell'de Agile",
+    q: "Turkcell'de çevik dönüşüme liderlik etmek için kurulan yapının adı nedir?",
+    options: ["Dijital Ofis", "Çevik Ofis", "İnovasyon Merkezi", "DevOps Birimi"],
+    answer: 1,
+    exp: "Turkcell'de dönüşüme liderlik etmek için <strong>Çevik Ofis</strong> kuruldu. Bu ofis rehberliğinde ekipler oluşturuldu ve ATOM (Agile Transformation Organizational Model) hayata geçirildi."
+  },
+  {
+    tag: "Turkcell'de Agile",
+    q: "Turkcell'de ekipler arasındaki etkileşimi artırmak için oluşturulan yapılar nelerdir?",
+    options: ["DevOps Cluster'lar", "Agility Cluster'lar", "Sprint Cluster'lar", "Test Cluster'lar"],
+    answer: 1,
+    exp: "Ekipler arasındaki etkileşimi artırmak için <strong>Agility Cluster'lar</strong> oluşturuldu. Organizasyon modeli: Individual → Squad → Cluster → Hub şeklinde katmanlıdır."
+  },
+  {
+    tag: "Turkcell'de Agile",
+    q: "Turkcell'de en yaygın kullanılan çevik yöntemler hangileridir?",
+    options: ["Waterfall ve V-Model", "Scrum, Kanban, Scrumban, Extended Kanban", "SAFe ve LeSS", "XP ve Crystal"],
+    answer: 1,
+    exp: "Turkcell'de her takım kendine en uygun yöntemi seçmiştir. En yaygın olanlar: <strong>Scrum, Kanban, Scrumban ve Extended Kanban</strong>'dır."
+  }
+];
 
-            const optionsList = document.createElement('ul');
-            optionsList.className = 'options-list';
+const automationQuestions = [
+  {
+    tag: "Testin Önemi",
+    q: "Yazılım sistemlerinin giderek daha karmaşık hale gelmesinin test açısından temel sonucu nedir?",
+    options: ["Test süreçleri kolaylaşmaktadır", "Kaliteyi garanti etmek artık daha zordur", "Test ekibine olan ihtiyaç azalmaktadır", "Manuel test yeterli hale gelmektedir"],
+    answer: 1,
+    exp: "Yazılım sistemleri artık çok daha büyük ve karmaşık. Bu nedenle <strong>kaliteyi garanti etmek artık daha zor</strong>. Finansal raporlama, üretim planlama gibi kritik modüllerin varlığı bunu daha da önemli kılıyor."
+  },
+  {
+    tag: "Testin Önemi",
+    q: "NASA'nın 1999 Mars inişi felaketine yol açan yazılım hatası ne kadar mali kayba neden oldu?",
+    options: ["$25 Milyon", "$125 Milyon", "$370 Milyon", "$500 Milyon"],
+    answer: 1,
+    exp: "<strong>NASA'nın Mars inişi (1999)</strong>: yazılımdaki bir çevrim hatası nedeniyle uyduya tekrar ulaşılamadı ve bu hata <strong>125 milyon dolar</strong> mali kayba yol açtı. Testin ne kadar kritik olduğunun çarpıcı bir örneğidir."
+  },
+  {
+    tag: "Testin Önemi",
+    q: "Ariane 5 roketindeki yazılım hatasının teknik sebebi neydi?",
+    options: ["32-bit'ten 8-bit'e çevrim hatası", "64-bit'ten 16-bit'e çevrim hatası", "16-bit'ten 32-bit'e çevrim hatası", "Bellek taşma hatası"],
+    answer: 1,
+    exp: "<strong>Ariane 5</strong> roketindeki felaket, <strong>64-bit'ten 16-bit'e çevrim</strong> sırasında yaşanan veri taşması sonucunda gerçekleşti ve yaklaşık 370 milyon dolar kayba neden oldu."
+  },
+  {
+    tag: "Testin Önemi",
+    q: "THERAC-25 Radyoterapi Makinesi'ndeki yazılım hatasının sonucu ne oldu?",
+    options: ["Maddi hasar oluştu", "Yalnızca veri kaybı yaşandı", "3 ölümle sonuçlandı", "Makine kullanılamaz hale geldi"],
+    answer: 2,
+    exp: "<strong>THERAC-25 Radyoterapi Makinesi</strong> yazılım hatası, hastaların aşırı radyasyona maruz kalmasına yol açtı ve <strong>3 ölümle</strong> sonuçlandı. Bu vaka, yazılım testinin insan hayatını doğrudan etkileyebileceğini göstermektedir."
+  },
+  {
+    tag: "Testin Önemi",
+    q: "Yeni teknolojilerle ilgili testin önemi bağlamında hangisi YANLIŞTIR?",
+    options: ["Yeni programlama dilleri yeni hataların doğmasına sebep olabilir", "Gelişmiş araçlar tüm hataları ortadan kaldırabilir", "Yarı statik web uygulamaları güvenlik açıkları doğurabilir", "Sunucu taraflı uygulamalarda performans sorunları oluşabilir"],
+    answer: 1,
+    exp: "Gelişmiş yazılım geliştirme araçları bazı hataların oluşmasını önleyebilir, ancak <strong>tamamını ortadan kaldırması mümkün değildir</strong>. Bu nedenle test süreci her zaman gereklidir."
+  },
+  {
+    tag: "Testin Basit İlkeleri",
+    q: "Fault (Arıza) kavramının doğru tanımı hangisidir?",
+    options: ["Beklenen çıktıyı üretememe durumu", "Yazılımdaki bir kusur", "Kusurlara neden olan hatalı bölüm", "Test senaryosunun başarısız olması"],
+    answer: 1,
+    exp: "<strong>Fault (Arıza)</strong>: Yazılımdaki bir kusurdur. Üç temel kavramı karıştırmamak gerekir: Fault = kusur, Error = kusura neden olan hatalı bölüm, Failure = beklenen çıktıyı üretememe."
+  },
+  {
+    tag: "Testin Basit İlkeleri",
+    q: "Error (Hata) kavramının doğru tanımı hangisidir?",
+    options: ["Yazılımdaki bir kusur", "Beklenen çıktıyı üretememe durumu", "Kusurlara neden olan hatalı bölümlerin her biri", "Test ortamındaki uyumsuzluk"],
+    answer: 2,
+    exp: "<strong>Error (Hata)</strong>: Kusurlara neden olan hatalı bölümlerin her biridir. Fault (kusur) kodda varsa, bu kusuru tetikleyen çalıştırma yolu Error'ı oluşturur."
+  },
+  {
+    tag: "Testin Basit İlkeleri",
+    q: "Failure (Başarısızlık) kavramının doğru tanımı hangisidir?",
+    options: ["Yazılımdaki bir kusur", "Kusurlara neden olan hatalı bölüm", "Test araçlarının çalışmaması", "Beklenen çıktıyı üretememe durumu"],
+    answer: 3,
+    exp: "<strong>Failure (Başarısızlık)</strong>: Yazılımın beklenen çıktıyı üretememe durumudur. Fault → Error → Failure zinciri şu şekilde işler: kodda kusur var, kusur tetiklendi, yanlış çıktı üretildi."
+  },
+  {
+    tag: "Testin Basit İlkeleri",
+    q: "Beizer'in Test Olgunluk modelinde Level 0 ne anlama gelir?",
+    options: ["Testin amacı yazılımın çalışmadığını göstermektir", "Test ile debugging arasında fark yoktur", "Test riski azaltmak için yapılır", "Test bir zihinsel disiplindir"],
+    answer: 1,
+    exp: "<strong>Level 0</strong>: 'There is no difference between testing and debugging.' — Test ile hata ayıklama arasında fark görülmez. Bu en ilkel ve olgunlaşmamış seviyedir."
+  },
+  {
+    tag: "Testin Basit İlkeleri",
+    q: "Beizer'in Level 3 test olgunluk seviyesinin amacı nedir?",
+    options: ["Yazılımın doğruluğunu kanıtlamak", "Yazılımın çalışmadığını göstermek", "Yazılımı kullanmanın riskini azaltmak", "Tüm hataları bulmak"],
+    answer: 2,
+    exp: "<strong>Level 3</strong>: 'The purpose of testing is not to prove anything specific, but to <strong>reduce the risk of using the software</strong>.' — Test spesifik bir şeyi kanıtlamak için değil, riski azaltmak için yapılır."
+  },
+  {
+    tag: "Testin Basit İlkeleri",
+    q: "Beizer'in en üst olgunluk seviyesi olan Level 4 testi nasıl tanımlar?",
+    options: ["Yazılımın performansını artıran bir araç", "Tüm BT profesyonellerinin daha kaliteli yazılım geliştirmesine yardımcı olan zihinsel bir disiplin", "Hata bulmaya odaklanan bir süreç", "Otomatik araçlarla yürütülen bir aktivite"],
+    answer: 1,
+    exp: "<strong>Level 4</strong>: 'Testing is a mental discipline that helps all IT professionals develop higher-quality software.' — Test, tüm BT profesyonellerini kapsayan ve kaliteyi artıran bir <strong>zihinsel disiplin</strong> olarak görülür."
+  },
+  {
+    tag: "Test Otomasyonu",
+    q: "Test otomasyonunun temel adımları doğru sırayla hangisidir?",
+    options: ["Execute → Setup → Compare → Report", "Setup pre conditions → Execute tests → Compare Results → Report test results", "Report → Setup → Execute → Compare", "Compare → Execute → Setup → Report"],
+    answer: 1,
+    exp: "Test otomasyonunun 4 temel adımı sırayla: <strong>1) Setup pre conditions → 2) Execute tests → 3) Compare Results → 4) Report test results</strong>. Bu döngü her test seti için tekrarlanır."
+  },
+  {
+    tag: "Test Otomasyonu",
+    q: "Test otomasyonunda organizasyonel zorluklar arasında hangisi YER ALMAZ?",
+    options: ["Farklı takımlar, farklı öncelikler", "Proje takvimi nedeniyle test otomasyonuna zaman ayrılmaması", "XPath ifadelerinin karmaşıklığı", "Sistem sahiplerinin desteğinin olmaması"],
+    answer: 2,
+    exp: "XPath ifadelerinin karmaşıklığı <strong>teknik bir zorluktur</strong>, organizasyonel değil. Organizasyonel zorluklar: farklı takım öncelikleri, sistem sahipliği desteği eksikliği ve zaman yetersizliğidir."
+  },
+  {
+    tag: "Test Otomasyonu",
+    q: "Test otomasyonundaki teknik zorluklar arasında hangisi YER ALMAZ?",
+    options: [".NET, Java, Python gibi farklı yazılım yığınları", "MSSQL, Oracle, PostgreSQL gibi database çeşitliliği", "Geliştirici ve testçi eksikliği", "Test ortamı uyumsuzlukları"],
+    answer: 2,
+    exp: "Geliştirici ve testçi eksikliği <strong>Kaynak & Proje gerçekleri</strong> kategorine aittir. Teknik zorluklar: farklı yazılım yığınları (.NET, Java, Python), database çeşitliliği ve test ortamı uyumsuzluklarıdır."
+  },
+  {
+    tag: "Turkcell'de Test Otomasyonu",
+    q: "Turkcell'de kullanılan test otomasyon platformunun adı nedir?",
+    options: ["TestRail", "Selenium Hub", "Testroyer", "Robot Framework"],
+    answer: 2,
+    exp: "<strong>Testroyer</strong>, Turkcell'in kendi test otomasyon platformudur. Selenium ve Java teknolojileri üzerine inşa edilmiştir."
+  },
+  {
+    tag: "Turkcell'de Test Otomasyonu",
+    q: "Testroyer platformu hangi iki temel teknoloji üzerine kurulmuştur?",
+    options: ["Python ve Appium", "Selenium ve Java", "JavaScript ve Cypress", "C# ve NUnit"],
+    answer: 1,
+    exp: "Turkcell'in Testroyer platformu <strong>Selenium</strong> (web otomasyon kütüphanesi) ve <strong>Java</strong> programlama dili üzerine inşa edilmiştir."
+  },
+  {
+    tag: "RPA",
+    q: "RPA'nın açılımı nedir?",
+    options: ["Remote Process Application", "Robotic Process Automation", "Rapid Programming Automation", "Recurring Process Analysis"],
+    answer: 1,
+    exp: "<strong>RPA = Robotic Process Automation (Robotik Süreç Otomasyonu)</strong>. Manuel olarak yapılan tekrarlayan ve kural tabanlı işlemleri otomatikleştirmek için kullanılan bir teknolojidir."
+  },
+  {
+    tag: "RPA",
+    q: "RPA yazılımı nasıl çalışır?",
+    options: ["Kaynak kodu analiz ederek çalışır", "Kullanıcı arayüzlerini simüle ederek uygulamaları insan gibi etkileşime girer", "Doğrudan veritabanına erişerek işlem yapar", "Makine öğrenmesi modelleri kullanır"],
+    answer: 1,
+    exp: "RPA yazılımı, <strong>kullanıcı arayüzlerini simüle ederek</strong> bilgisayarları ve uygulamaları insan gibi etkileşime girmeye zorlar. Bu sayede kaynak koduna erişmeden sistemleri otomatikleştirebilir."
+  },
+  {
+    tag: "RPA",
+    q: "RPA'nın faydaları arasında hangisi YER ALMAZ?",
+    options: ["Verimliliği artırır", "Doğruluğu artırır", "Yazılım güvenlik açıklarını tamamen kapatır", "Maliyetleri azaltır"],
+    answer: 2,
+    exp: "RPA'nın üç temel faydası: <strong>1) Verimlilik artışı</strong> (çalışanlar stratejik işlere odaklanır), <strong>2) Doğruluk artışı</strong> (insan hatası azalır), <strong>3) Maliyet azaltma</strong> (zaman ve kaynak tasarrufu). Güvenlik açıklarını kapatmak RPA'nın görevi değildir."
+  },
+  {
+    tag: "XPath",
+    q: "XPath nedir?",
+    options: ["Bir programlama dili", "XML belgelerini tanımlamak ve konumlandırmak için kullanılan bir yol dili", "Bir test framework'ü", "Bir veritabanı sorgulama dili"],
+    answer: 1,
+    exp: "<strong>XPath (XML Path Language)</strong>: XML belgelerini tanımlamak ve konumlandırmak için kullanılan bir yol dilidir. Test otomasyonunda web sayfalarındaki öğeleri bulmak için kullanılır."
+  },
+  {
+    tag: "XPath",
+    q: "XPath, XML belgelerini nasıl temsil eder?",
+    options: ["Tablo yapısı olarak", "Ağaç yapısı olarak", "Liste yapısı olarak", "Çizge (graph) yapısı olarak"],
+    answer: 1,
+    exp: "XPath, XML belgelerini <strong>ağaç yapısı</strong> olarak temsil eder. Bir XPath ifadesi bu ağaç yapısındaki bir öğeyi veya öğe kümesini tanımlamak için kullanılan bir dizi yol göstericidir."
+  },
+  {
+    tag: "XPath",
+    q: "Bir web sayfasındaki tüm düğmeleri (button) bulmak için doğru XPath ifadesi hangisidir?",
+    options: ["#button", ".button", "//button", "@button"],
+    answer: 2,
+    exp: "Bir web sayfasındaki tüm düğmeleri bulmak için <strong>//button</strong> ifadesi kullanılır. '//' işareti sayfanın herhangi bir yerindeki elemanlara erişimi sağlar."
+  },
+  {
+    tag: "XPath",
+    q: "id niteliği 'username' olan bir input öğesini bulan XPath ifadesi hangisidir?",
+    options: ["//input[@id='username']", "//input[id='username']", "//input.id='username'", "#input[@id='username']"],
+    answer: 0,
+    exp: "Doğru ifade: <strong>//input[@id='username']</strong> — XPath'te nitelik (attribute) seçimi için köşeli parantez ve @ işareti kullanılır. Örnek: //eleman[@nitelik='değer']"
+  },
+  {
+    tag: "XPath",
+    q: "//input[@type='text'] XPath ifadesi ne işe yarar?",
+    options: ["Sayfadaki tüm input alanlarını bulur", "Sayfadaki text tipindeki metin kutularını bulur", "Sayfanın başlığını bulur", "Sayfadaki tüm form elemanlarını bulur"],
+    answer: 1,
+    exp: "<strong>//input[@type='text']</strong> ifadesi web sayfasındaki <strong>text tipindeki metin kutularını</strong> bulur. @type='text' nitelik filtresi yalnızca metin kutularını döndürür."
+  },
+  {
+    tag: "Test Frameworkleri",
+    q: "Mobil uygulamaları test etmek için kullanılan framework hangisidir?",
+    options: ["JUnit", "Appium", "PHPUnit", "NUnit"],
+    answer: 1,
+    exp: "<strong>Appium</strong>, mobil uygulamaları test etmek için kullanılan bir test çerçevesidir. iOS ve Android platformlarındaki uygulamaları otomatik test edebilir."
+  },
+  {
+    tag: "Test Frameworkleri",
+    q: "BDD (Behavior Driven Development / Davranış Odaklı Test) için kullanılan framework hangisidir?",
+    options: ["JUnit", "NUnit", "Cucumber", "PHPUnit"],
+    answer: 2,
+    exp: "<strong>Cucumber</strong> ve Gauge, davranış odaklı test (BDD) için kullanılan test çerçeveleridir. BDD'de testler insan tarafından okunabilir senaryolar (Gherkin) olarak yazılır."
+  },
+  {
+    tag: "Test Frameworkleri",
+    q: "C# programlama dili için kullanılan birim test framework'ü hangisidir?",
+    options: ["JUnit", "PHPUnit", "Python Unittest", "NUnit"],
+    answer: 3,
+    exp: "<strong>NUnit</strong>, C# için kullanılan birim test çerçevesidir. Diğerleri: JUnit → Java, PHPUnit → PHP, Python Unittest → Python."
+  },
+  {
+    tag: "Test Frameworkleri",
+    q: "SonarQube aracı ne için kullanılır?",
+    options: ["Test senaryosu yönetimi", "Kod kalitesi ve güvenlik analizi", "Otomatik deploy işlemleri", "Performans testi"],
+    answer: 1,
+    exp: "<strong>SonarQube</strong>, Jenkins pipeline'ında yer alan ve <strong>kod kalitesi ile güvenlik analizi</strong> yapan araçtır. Bug sayısı, güvenlik açıkları, kod kokuları (code smells) ve test kapsamı gibi metrikleri raporlar."
+  }
+];
 
-            const rationaleDiv = document.createElement('div');
-            rationaleDiv.className = 'rationale';
+// --- DURUM DEĞİŞKENLERİ ---
+let currentMode = ''; // 'sdlc' veya 'automation'
+let shuffled = [];
+let current = 0;
+let score = 0;
+let answered = false;
 
-            q.options.forEach((opt) => {
-                const li = document.createElement('li');
-                li.className = 'option-item';
-                li.innerText = opt.text;
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
 
-                li.addEventListener('click', () => {
-                    // Şıkları kilitle
-                    Array.from(optionsList.children).forEach(item => {
-                        item.classList.add('disabled');
-                    });
-                    
-                    if (opt.correct) {
-                        li.classList.add('correct');
-                        rationaleDiv.style.borderLeftColor = 'var(--success-color)';
-                        rationaleDiv.innerHTML = `<strong>Doğru!</strong> <br>${opt.rationale}`;
-                    } else {
-                        li.classList.add('incorrect');
-                        rationaleDiv.style.borderLeftColor = 'var(--danger-color)';
-                        rationaleDiv.innerHTML = `<strong>Yanlış Cevap!</strong> <br>${opt.rationale}<br><br><em>Doğru şıkkı bulmak için rasyonelleri inceleyin.</em>`;
-                        
-                        // Doğru olanı da göster
-                        Array.from(optionsList.children).forEach((item, index) => {
-                            if (q.options[index].correct) {
-                                item.classList.add('correct');
-                            }
-                        });
-                    }
-                    rationaleDiv.style.display = 'block';
-                });
+// --- MOD BAŞLATMA FONKSİYONU ---
+function startQuiz(mode) {
+  currentMode = mode;
+  current = 0;
+  score = 0;
+  answered = false;
 
-                optionsList.appendChild(li);
-            });
+  // Tasarım ve başlıkları dinamik olarak güncelle
+  const header = document.getElementById('mainHeader');
+  const progressBar = document.getElementById('progressBar');
+  
+  document.getElementById('selectionScreen').style.display = 'none';
+  document.getElementById('resultScreen').classList.remove('show');
+  document.getElementById('quizAreaWrap').style.display = 'block';
 
-            card.appendChild(optionsList);
-            card.appendChild(rationaleDiv);
-            container.appendChild(card);
-        });
-    </script>
+  if (mode === 'sdlc') {
+    shuffled = shuffle(sdlcQuestions);
+    header.className = 'mode-sdlc';
+    document.getElementById('headerTitle').innerText = '📚 SDLC Final Sınavı Hazırlık';
+    document.getElementById('headerSubtitle').innerText = 'Turkcell ERP Systems · Yazılım Geliştirme Yaşam Döngüsü';
+    progressBar.className = 'progress-bar progress-sdlc';
+  } else if (mode === 'automation') {
+    shuffled = shuffle(automationQuestions);
+    header.className = 'mode-automation';
+    document.getElementById('headerTitle').innerText = '🧪 Test Otomasyonu Sınavı';
+    document.getElementById('headerSubtitle').innerText = 'Turkcell ERP Systems · Hafta 15 · Test Otomasyon';
+    progressBar.className = 'progress-bar progress-automation';
+  }
+
+  render();
+}
+
+// --- SORU ÇİZME FONKSİYONU ---
+function render() {
+  const total = shuffled.length;
+  document.getElementById('totalQ').textContent = total;
+  document.getElementById('currentQ').textContent = current + 1;
+  document.getElementById('scoreDisplay').textContent = score;
+  document.getElementById('progressBar').style.width = ((current / total) * 100) + '%';
+
+  if (current >= total) { showResult(); return; }
+
+  const q = shuffled[current];
+  answered = false;
+
+  const indexed = q.options.map((o, i) => ({ text: o, orig: i }));
+  const shuffledOpts = shuffle(indexed);
+  const newCorrect = shuffledOpts.findIndex(o => o.orig === q.answer);
+
+  // Sınav türüne göre dinamik class belirleme
+  const tagClass = currentMode === 'sdlc' ? 'tag-sdlc' : 'tag-automation';
+  const qnClass = currentMode === 'sdlc' ? 'qn-sdlc' : 'qn-automation';
+  const btnStyleClass = currentMode === 'sdlc' ? 'btn-sdlc' : 'btn-automation';
+  const nextBtnClass = currentMode === 'sdlc' ? 'nb-sdlc' : 'nb-automation';
+
+  document.getElementById('quizArea').innerHTML = `
+    <div class="card">
+      <div class="tag ${tagClass}">${q.tag}</div>
+      <div class="question-number ${qnClass}">SORU ${current + 1} / ${shuffled.length}</div>
+      <div class="question-text">${q.q}</div>
+      <div class="options" id="options">
+        ${shuffledOpts.map((o, i) => `
+          <button class="option-btn ${btnStyleClass}" onclick="select(${i}, ${newCorrect})" id="opt${i}">
+            <span style="font-weight:700;margin-right:8px">${['A','B','C','D'][i]})</span>${o.text}
+          </button>
+        `).join('')}
+      </div>
+      <div class="explanation" id="explanation">💡 <strong>Açıklama:</strong> ${q.exp}</div>
+      <button class="next-btn ${nextBtnClass}" id="nextBtn" onclick="next()">
+        ${current + 1 < shuffled.length ? 'Sonraki Soru →' : 'Sonuçları Gör 🎯'}
+      </button>
+    </div>
+  `;
+}
+
+// --- ŞIK SEÇME FONKSİYONU ---
+function select(chosen, correct) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b => b.disabled = true);
+  
+  // Orijinal score bar tasarımındaki güçlü rengi koruma
+  const scoreDisplay = document.getElementById('scoreDisplay');
+  
+  if (chosen === correct) { 
+    btns[chosen].classList.add('correct'); 
+    score++; 
+    scoreDisplay.textContent = score; 
+  } else { 
+    btns[chosen].classList.add('wrong'); 
+    btns[correct].classList.add('reveal'); 
+  }
+  document.getElementById('explanation').classList.add('show');
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function next() { current++; render(); }
+
+// --- SONUÇ EKRANI FONKSİYONU ---
+function showResult() {
+  document.getElementById('quizArea').innerHTML = '';
+  const pct = Math.round((score / shuffled.length) * 100);
+  
+  const finalScore = document.getElementById('finalScore');
+  finalScore.textContent = pct + '%';
+  
+  // Tema moduna göre skor rengini ayarla
+  finalScore.className = currentMode === 'sdlc' ? 'big-score bs-sdlc' : 'big-score bs-automation';
+  
+  // Yeniden başlat buton stilini eşitle
+  const restartBtn = document.getElementById('restartBtn');
+  restartBtn.className = currentMode === 'sdlc' ? 'restart-btn rb-sdlc' : 'restart-btn rb-automation';
+
+  let title, msg;
+  if (pct >= 90) { 
+    title = '🏆 Mükemmel!'; 
+    msg = currentMode === 'sdlc' ? 'Final sınavına hazırsın! 100 almaya çok yakınsın.' : 'Test Otomasyon konusunu çok iyi öğrenmişsin!'; 
+  } else if (pct >= 75) { 
+    title = '👍 Çok İyi!'; 
+    msg = 'Sağlam bir hazırlık yaptın. Yanlışları tekrar gözden geçir.'; 
+  } else if (pct >= 60) { 
+    title = '📖 İyi Gidiyorsun'; 
+    msg = 'Temel konuları kavradın, eksik kısımları pekiştir.'; 
+  } else { 
+    title = '💪 Çalışmaya Devam!'; 
+    msg = 'Endişelenme, konuları tekrar okuyup dene!'; 
+  }
+  
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultMsg').textContent = `${score} / ${shuffled.length} doğru · ${msg}`;
+  document.getElementById('progressBar').style.width = '100%';
+  document.getElementById('resultScreen').classList.add('show');
+}
+
+// --- YENİDEN BAŞLATMA VE MENÜ FONKSİYONLARI ---
+function restart() {
+  startQuiz(currentMode);
+}
+
+function backToMenu() {
+  document.getElementById('quizAreaWrap').style.display = 'none';
+  document.getElementById('selectionScreen').style.display = 'flex';
+  
+  const header = document.getElementById('mainHeader');
+  header.className = 'mode-selection';
+  document.getElementById('headerTitle').innerText = '📚 Sınav Hazırlık Merkezi';
+  document.getElementById('headerSubtitle').innerText = 'Turkcell ERP Systems · Çalışmak İstediğiniz Modülü Seçin';
+}
+</script>
 </body>
 </html>
